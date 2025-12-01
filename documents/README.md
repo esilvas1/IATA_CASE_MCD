@@ -134,6 +134,33 @@ La separación de esquemas OLTP y OLAP permite:
    ```
    Estos permisos son esenciales para que el proceso ETL pueda extraer datos del sistema transaccional.
 
+   **Verificación de permisos otorgados**:
+   ```sql
+   SELECT 
+       grantee,
+       owner,
+       table_name,
+       privilege
+   FROM dba_tab_privs 
+   WHERE grantee = 'IATA_OLAP'
+   ORDER BY table_name;
+   ```
+
+   **Resultado de la consulta**:
+   
+   | GRANTEE | OWNER | TABLE_NAME | PRIVILEGE |
+   |---------|-------|------------|-----------|
+   | IATA_OLAP | IATA | AEROLINEAS | SELECT |
+   | IATA_OLAP | IATA | AEROPUERTOS | SELECT |
+   | IATA_OLAP | IATA | AVIONES | SELECT |
+   | IATA_OLAP | IATA | CIUDADES | SELECT |
+   | IATA_OLAP | IATA | ITINERARIOS | SELECT |
+   | IATA_OLAP | IATA | MODELOS | SELECT |
+   | IATA_OLAP | IATA | USUARIOS | SELECT |
+   | IATA_OLAP | IATA | VUELOS | SELECT |
+
+   ✅ Se confirmó que el usuario IATA_OLAP tiene permisos SELECT sobre las 8 tablas del esquema IATA.
+
 5. **Verificación de la configuración**:
    - Se validó la creación del usuario/esquema
    - Se verificaron los privilegios otorgados
