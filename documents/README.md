@@ -1,10 +1,8 @@
 # Caso IATA - Gestión de Datos
 
-**Maestría:** Ciencia de Datos  
-**Universidad:** Pontificia Universidad Javeriana  
-**Materia:** Gestión de Datos  
-**Estudiantes:** Edwin Silva Salas, Carlos Preciado Cárdenas, Cristian Restrepo Zapata  
-**Fecha de inicio:** Noviembre 2025
+| **Información del Proyecto** | |
+|:---|---:|
+| **Maestría:** Ciencia de Datos<br>**Universidad:** Pontificia Universidad Javeriana<br>**Materia:** Gestión de Datos<br>**Estudiantes:** Edwin Silva Salas, Carlos Preciado Cárdenas, Cristian Restrepo Zapata<br>**Fecha de inicio:** Noviembre 2025 | <img src="https://raw.githubusercontent.com/esilvas1/IATA_CASE_MCD/main/images/pontificia-universidad-logo.png" alt="Logo Pontificia Universidad Javeriana" width="120"/> |
 
 
 ## Descripción del proyecto
@@ -86,8 +84,84 @@ El script se ejecutó **con cero errores**, creando exitosamente toda la estruct
 
 ## Proceso de Implementación (OLAP)
 
+### Fase 1: Preparación del Entorno OLAP ✅
+- [x] Crear esquema IATA_OLAP en la base de datos
+- [x] Otorgar privilegios básicos al esquema OLAP
+- [x] Configurar permisos de lectura sobre esquema OLTP (IATA)
+- [x] Validar conectividad entre esquemas
 
-### Fase 1: Diseño del Data Mart (Pendiente)
+#### Detalles de Creación del Esquema OLAP
+
+Para implementar una arquitectura de datos robusta y siguiendo las mejores prácticas de separación entre sistemas transaccionales (OLTP) y analíticos (OLAP), se procedió a crear un **esquema independiente llamado IATA_OLAP** que albergará el Data Mart dimensional.
+
+**Justificación arquitectónica:**
+
+La separación de esquemas OLTP y OLAP permite:
+- **Independencia operacional**: Las consultas analíticas no afectan el rendimiento transaccional
+- **Seguridad por capas**: Control de acceso diferenciado entre operaciones y análisis
+- **Optimización específica**: Cada esquema puede optimizarse para su propósito (escritura vs lectura)
+- **Mantenibilidad**: Cambios en el modelo dimensional no impactan el sistema operacional
+
+**Pasos ejecutados (ver script completo en [`Creacion_IATA_OLAP.sql`](https://github.com/esilvas1/IATA_CASE_MCD/blob/main/scripts/Creacion_IATA_OLAP.sql)):**
+
+1. **Conexión como usuario SYS**: Se estableció conexión con privilegios SYSDBA
+2. **Creación del esquema IATA_OLAP**:
+   ```sql
+   CREATE USER IATA_OLAP IDENTIFIED BY "passIATAOLAP123";
+   ```
+
+3. **Asignación de privilegios básicos**:
+   ```sql
+   GRANT CONNECT, RESOURCE TO IATA_OLAP;
+   ALTER USER IATA_OLAP QUOTA UNLIMITED ON USERS;
+   GRANT CREATE MATERIALIZED VIEW TO IATA_OLAP;
+   ```
+   - `CONNECT`: Permite conectarse a la base de datos
+   - `RESOURCE`: Permite crear objetos dimensionales (tablas, vistas, procedimientos)
+   - `QUOTA UNLIMITED`: Espacio ilimitado en tablespace USERS
+   - `CREATE MATERIALIZED VIEW`: Para crear vistas materializadas (opcional para optimización)
+
+4. **Configuración de permisos de lectura sobre IATA (OLTP)**:
+   ```sql
+   GRANT SELECT ON IATA.AEROLINEAS TO IATA_OLAP;
+   GRANT SELECT ON IATA.AEROPUERTOS TO IATA_OLAP;
+   GRANT SELECT ON IATA.AVIONES TO IATA_OLAP;
+   GRANT SELECT ON IATA.CIUDADES TO IATA_OLAP;
+   GRANT SELECT ON IATA.ITINERARIOS TO IATA_OLAP;
+   GRANT SELECT ON IATA.MODELOS TO IATA_OLAP;
+   GRANT SELECT ON IATA.USUARIOS TO IATA_OLAP;
+   GRANT SELECT ON IATA.VUELOS TO IATA_OLAP;
+   ```
+   Estos permisos son esenciales para que el proceso ETL pueda extraer datos del sistema transaccional.
+
+5. **Verificación de la configuración**:
+   - Se validó la creación del usuario/esquema
+   - Se verificaron los privilegios otorgados
+   - Se comprobaron las cuotas asignadas en tablespace
+
+**Arquitectura resultante:**
+
+```
+┌─────────────────┐         ETL         ┌─────────────────┐
+│  Esquema IATA   │  ────────────────>  │ Esquema         │
+│     (OLTP)      │   SELECT Grants     │  IATA_OLAP      │
+│                 │                     │     (OLAP)      │
+│ - AEROLINEAS    │                     │                 │
+│ - AEROPUERTOS   │                     │ [Por crear:]    │
+│ - AVIONES       │                     │ - DIM_TIEMPO    │
+│ - CIUDADES      │                     │ - DIM_RUTA      │
+│ - ITINERARIOS   │                     │ - DIM_AEROLINEA │
+│ - MODELOS       │                     │ - DIM_CLIENTE   │
+│ - USUARIOS      │                     │ - FACT_VENTAS   │
+│ - VUELOS        │                     │                 │
+└─────────────────┘                     └─────────────────┘
+    170 registros                        Data Mart dimensional
+```
+
+**Resultado:**
+✅ El esquema IATA_OLAP se creó exitosamente con todos los privilegios necesarios y permisos de lectura configurados sobre las tablas del esquema IATA (OLTP). El sistema está listo para iniciar el diseño y carga del Data Mart.
+
+### Fase 2: Diseño del Data Mart (Pendiente)
 - [ ] Crear tablas de dimensiones (Tiempo, Ruta, Aerolínea, Cliente)
 - [ ] Crear tabla de hechos (Ventas de Vuelos)
 - [ ] Implementar proceso ETL para poblar el Data Mart
