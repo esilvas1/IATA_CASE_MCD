@@ -65,6 +65,22 @@ GRANT CONNECT, RESOURCE TO IATA;
 ALTER USER IATA QUOTA UNLIMITED ON USERS;
 ```
 
+**Ver detalles completos del script de creación:** [`Creacion_IATA_OLTP.sql`](https://github.com/esilvas1/IATA_CASE_MCD/blob/main/scripts/Creacion_IATA_OLTP.sql)
+
+#### Conexión al Esquema IATA
+
+Una vez completada la configuración del usuario IATA, se estableció una nueva conexión a la base de datos utilizando las credenciales del usuario IATA. Esta conexión permite trabajar directamente sobre el esquema transaccional, garantizando que todos los objetos de base de datos se creen bajo el propietario correcto.
+
+**Datos de conexión utilizados:**
+- **Username**: IATA
+- **Password**: passIATA123
+- **Role**: Default (ninguno, a diferencia de SYS que requiere SYSDBA)
+- **Hostname**: localhost
+- **Port**: 1521
+- **Service Name**: FREEPDB1
+
+Con la conexión establecida como usuario IATA, se procede a la siguiente fase: la carga de datos transaccionales mediante la ejecución del script proporcionado.
+
 ### Fase 2: Carga de Datos Fuente
 - [x] Ejecutar script `IATA.sql` para crear las tablas transaccionales
 - [x] Verificar la carga de datos (170 vuelos, 20 usuarios, 35 itinerarios)
@@ -72,7 +88,7 @@ ALTER USER IATA QUOTA UNLIMITED ON USERS;
 
 #### Ejecución del Script IATA.sql
 
-Posterior a la creación del usuario IATA, se procedió a ejecutar el script **`IATA.sql`** proporcionado como insumo de la actividad. Este script contiene:
+Posterior a la creación del usuario IATA, se procedió a ejecutar el script **[`IATA.sql`](https://github.com/esilvas1/IATA_CASE_MCD/blob/main/scripts/IATA.sql)** proporcionado como insumo de la actividad. Este script contiene:
 
 - **8 tablas del modelo relacional**: AEROLINEAS, AEROPUERTOS, AVIONES, CIUDADES, ITINERARIOS, MODELOS, USUARIOS, VUELOS
 - **Inserción de datos de prueba**: 170 registros de vuelos, 20 usuarios, 35 itinerarios, 12 ciudades, entre otros
@@ -81,6 +97,8 @@ Posterior a la creación del usuario IATA, se procedió a ejecutar el script **`
 
 **Resultado de la ejecución:**
 El script se ejecutó **con cero errores**, creando exitosamente toda la estructura de base de datos y cargando los datos en el schema IATA
+
+
 
 ## Proceso de Implementación (OLAP)
 
@@ -187,11 +205,13 @@ La separación de esquemas OLTP y OLAP permite:
 ```
 
 **Resultado:**
-El esquema IATA_OLAP se creó exitosamente con todos los privilegios necesarios y permisos de lectura configurados sobre las tablas del esquema IATA (OLTP). Las tablas del Data Mart están creadas y listas para el proceso ETL.
+El esquema IATA_OLAP se creó exitosamente con todos los privilegios necesarios y permisos de lectura configurados sobre las tablas del esquema IATA (OLTP). 
+
+**Ver detalles completos del script de creación:** [`Creacion_IATA_OLAP.sql`](https://github.com/esilvas1/IATA_CASE_MCD/blob/main/scripts/Creacion_IATA_OLAP.sql)
 
 #### Conexión al Esquema IATA_OLAP
 
-Una vez completada la configuración del esquema IATA_OLAP, se procedió a establecer una nueva conexión a la base de datos utilizando las credenciales del usuario IATA_OLAP. Esta conexión permite trabajar directamente sobre el esquema analítico, garantizando que todos los objetos dimensionales (tablas de dimensiones y hechos) se creen bajo el propietario correcto.
+Una vez completada la configuración del esquema IATA_OLAP (ver script anterior), se procedió a establecer una nueva conexión a la base de datos utilizando las credenciales del usuario IATA_OLAP. Esta conexión permite trabajar directamente sobre el esquema analítico, garantizando que todos los objetos dimensionales (tablas de dimensiones y hechos) se creen bajo el propietario correcto.
 
 **Datos de conexión utilizados:**
 - **Username**: IATA_OLAP
