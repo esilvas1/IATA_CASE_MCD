@@ -84,7 +84,7 @@ El script se ejecutó **con cero errores**, creando exitosamente toda la estruct
 
 ## Proceso de Implementación (OLAP)
 
-### Fase 1: Preparación del Entorno OLAP ✅
+### Fase 1: Preparación del Entorno OLAP
 - [x] Crear esquema IATA_OLAP en la base de datos
 - [x] Otorgar privilegios básicos al esquema OLAP
 - [x] Configurar permisos de lectura sobre esquema OLTP (IATA)
@@ -159,7 +159,7 @@ La separación de esquemas OLTP y OLAP permite:
 ```
 
 **Resultado:**
-✅ El esquema IATA_OLAP se creó exitosamente con todos los privilegios necesarios y permisos de lectura configurados sobre las tablas del esquema IATA (OLTP). El sistema está listo para iniciar el diseño y carga del Data Mart.
+El esquema IATA_OLAP se creó exitosamente con todos los privilegios necesarios y permisos de lectura configurados sobre las tablas del esquema IATA (OLTP). El sistema está listo para iniciar el diseño y carga del Data Mart.
 
 ### Fase 2: Diseño del Data Mart (Pendiente)
 - [ ] Crear tablas de dimensiones (Tiempo, Ruta, Aerolínea, Cliente)
