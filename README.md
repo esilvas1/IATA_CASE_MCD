@@ -249,6 +249,12 @@ El diseño contempla las 4 preguntas analíticas clave del caso:
 3. Modelos de avión con más vuelos por año
 4. Ciudades cuyos habitantes viajaron más por año
 
+**Diagrama del Modelo Estrella:**
+
+<p align="center">
+  <img src="https://raw.githubusercontent.com/esilvas1/IATA_CASE_MCD/main/images/modelo_estrella.png" alt="Modelo Estrella - Data Mart IATA" width="800"/>
+</p>
+
 #### Ejecución del Script de Creación
 
 Una vez conectados como usuario **IATA_OLAP**, se ejecutó el script [`Creacion_DATA_MART.sql`](https://github.com/esilvas1/IATA_CASE_MCD/blob/main/scripts/Creacion_DATA_MART.sql) que contiene todas las sentencias DDL para crear la estructura dimensional del Data Mart.
@@ -273,6 +279,8 @@ Tablas de dimensiones y hechos listas para carga ETL
 
 El Data Mart se creó exitosamente con todas las tablas dimensionales y de hechos. El modelo está estructuralmente completo y listo para iniciar el **proceso ETL** de carga de datos desde el esquema transaccional IATA (OLTP).
 
+
+
 ### Fase 3: Proceso ETL (Pendiente)
 - [ ] Diseñar queries de extracción desde esquema IATA (OLTP)
 - [ ] Implementar transformaciones de datos
@@ -292,5 +300,5 @@ El Data Mart se creó exitosamente con todas las tablas dimensionales y de hecho
 **Estudiante:** Edwin Silva Salas, Carlos Preciado Cárdenas, Cristian Restrepo Zapata       
 **Programa:** Maestría en Ciencia de Datos  
 **Universidad:** Pontificia Universidad Javeriana  
-**Repositorio:** [IATA_CASE_MCD](https://github.com/esilvas1/IATA_CASE_MCD)
+**Repositorio GIT:** [IATA_CASE_MCD](https://github.com/esilvas1/IATA_CASE_MCD)
 
