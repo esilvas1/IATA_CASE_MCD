@@ -331,20 +331,15 @@ FROM (
 ORDER BY f;
 ```
 
-**Resultado de carga (primeros 10 registros):**
+**Resultado de carga (primeros 5 registros):**
 
-| ID_TIEMPO | FECHA | ANIO | SEMESTRE | TRIMESTRE | MES | NOMBRE_MES | DIA | DIA_SEMANA | NOMBRE_DIA |
-|-----------|-------|------|----------|-----------|-----|------------|-----|------------|------------|
-| 1 | 2019-01-15 | 2019 | 1 | 1 | 1 | Enero | 15 | 3 | Martes |
-| 2 | 2019-02-20 | 2019 | 1 | 1 | 2 | Febrero | 20 | 4 | Miércoles |
-| 3 | 2019-03-10 | 2019 | 1 | 1 | 3 | Marzo | 10 | 1 | Domingo |
-| 4 | 2019-04-05 | 2019 | 1 | 2 | 4 | Abril | 5 | 6 | Viernes |
-| 5 | 2019-05-12 | 2019 | 1 | 2 | 5 | Mayo | 12 | 1 | Domingo |
-| 6 | 2019-06-18 | 2019 | 1 | 2 | 6 | Junio | 18 | 3 | Martes |
-| 7 | 2019-07-22 | 2019 | 2 | 3 | 7 | Julio | 22 | 2 | Lunes |
-| 8 | 2019-08-30 | 2019 | 2 | 3 | 8 | Agosto | 30 | 6 | Viernes |
-| 9 | 2019-09-14 | 2019 | 2 | 3 | 9 | Septiembre | 14 | 7 | Sábado |
-| 10 | 2019-10-25 | 2019 | 2 | 4 | 10 | Octubre | 25 | 6 | Viernes |
+| ID_TIEMPO | FECHA | ANIO | SEMESTRE | NOMBRE_MES |
+|-----------|-------|------|----------|------------|
+| 1 | 2019-01-15 | 2019 | 1 | Enero |
+| 2 | 2019-02-20 | 2019 | 1 | Febrero |
+| 3 | 2019-03-10 | 2019 | 1 | Marzo |
+| 4 | 2019-07-22 | 2019 | 2 | Julio |
+| 5 | 2019-10-25 | 2019 | 2 | Octubre |
 
 **Descripción:** Extrae todas las fechas únicas de salida y llegada de vuelos desde `IATA.ITINERARIOS`, generando automáticamente los atributos temporales (año, semestre, trimestre, mes, día, nombres en español).
 
@@ -371,20 +366,15 @@ JOIN  IATA.AEROPUERTOS      a_d ON i.id_aeropuerto_destino = a_d.id_aeropuerto
 JOIN  IATA.CIUDADES         c_d ON a_d.id_ciudad           = c_d.id_ciudad;
 ```
 
-**Resultado de carga (primeros 10 registros):**
+**Resultado de carga (primeros 5 registros):**
 
-| ID_RUTA | CIUDAD_ORIGEN | AEROPUERTO_ORIGEN | CIUDAD_DESTINO | AEROPUERTO_DESTINO | RUTA_COMPLETA |
-|---------|---------------|-------------------|----------------|--------------------|---------------|
-| 1 | Bogotá | Aeropuerto Internacional El Dorado | Madrid | Aeropuerto Adolfo Suárez Madrid-Barajas | Bogotá - Madrid |
-| 2 | Bogotá | Aeropuerto Internacional El Dorado | Roma | Aeropuerto Leonardo da Vinci-Fiumicino | Bogotá - Roma |
-| 3 | Medellín | Aeropuerto Internacional José María Córdova | Madrid | Aeropuerto Adolfo Suárez Madrid-Barajas | Medellín - Madrid |
-| 4 | Medellín | Aeropuerto Internacional José María Córdova | París | Aeropuerto Charles de Gaulle | Medellín - París |
-| 5 | Cali | Aeropuerto Internacional Alfonso Bonilla Aragón | Barcelona | Aeropuerto de Barcelona-El Prat | Cali - Barcelona |
-| 6 | Cali | Aeropuerto Internacional Alfonso Bonilla Aragón | Roma | Aeropuerto Leonardo da Vinci-Fiumicino | Cali - Roma |
-| 7 | Cartagena | Aeropuerto Internacional Rafael Núñez | Madrid | Aeropuerto Adolfo Suárez Madrid-Barajas | Cartagena - Madrid |
-| 8 | Cartagena | Aeropuerto Internacional Rafael Núñez | Londres | Aeropuerto de Heathrow | Cartagena - Londres |
-| 9 | Barranquilla | Aeropuerto Internacional Ernesto Cortissoz | París | Aeropuerto Charles de Gaulle | Barranquilla - París |
-| 10 | Barranquilla | Aeropuerto Internacional Ernesto Cortissoz | Roma | Aeropuerto Leonardo da Vinci-Fiumicino | Barranquilla - Roma |
+| ID_RUTA | CIUDAD_ORIGEN | CIUDAD_DESTINO | RUTA_COMPLETA |
+|---------|---------------|----------------|---------------|
+| 1 | Bogotá | Madrid | Bogotá - Madrid |
+| 2 | Bogotá | Roma | Bogotá - Roma |
+| 3 | Medellín | Madrid | Medellín - Madrid |
+| 4 | Cali | Barcelona | Cali - Barcelona |
+| 5 | Cartagena | Londres | Cartagena - Londres |
 
 **Descripción:** Combina itinerarios con aeropuertos y ciudades para generar rutas completas origen-destino con información descriptiva.
 
@@ -455,20 +445,15 @@ FROM IATA.USUARIOS u
 JOIN IATA.CIUDADES c ON u.id_ciudad = c.id_ciudad;
 ```
 
-**Resultado de carga (primeros 10 registros):**
+**Resultado de carga (primeros 5 registros):**
 
-| ID_CLIENTE | NOMBRE_COMPLETO | EMAIL | CIUDAD_RESIDENCIA |
-|------------|-----------------|-------|-------------------|
-| 1001234567 | Juan Pérez | juan.perez@email.com | Bogotá |
-| 1002345678 | María García | maria.garcia@email.com | Medellín |
-| 1003456789 | Carlos López | carlos.lopez@email.com | Cali |
-| 1004567890 | Ana Martínez | ana.martinez@email.com | Barranquilla |
-| 1005678901 | Luis Rodríguez | luis.rodriguez@email.com | Cartagena |
-| 1006789012 | Laura Fernández | laura.fernandez@email.com | Bogotá |
-| 1007890123 | Pedro Sánchez | pedro.sanchez@email.com | Medellín |
-| 1008901234 | Carmen Díaz | carmen.diaz@email.com | Cali |
-| 1009012345 | Jorge Ramírez | jorge.ramirez@email.com | Bogotá |
-| 1010123456 | Lucía Torres | lucia.torres@email.com | Cartagena |
+| ID_CLIENTE | NOMBRE_COMPLETO | CIUDAD_RESIDENCIA |
+|------------|-----------------|-------------------|
+| 1001234567 | Juan Pérez | Bogotá |
+| 1002345678 | María García | Medellín |
+| 1003456789 | Carlos López | Cali |
+| 1004567890 | Ana Martínez | Barranquilla |
+| 1005678901 | Luis Rodríguez | Cartagena |
 
 **Descripción:** Combina información de usuarios con sus ciudades de residencia, concatenando nombre y apellido en un solo campo.
 
@@ -503,20 +488,15 @@ JOIN IATA.USUARIOS      u   ON v.id_usuario    = u.cedula
 JOIN DIM_TIEMPO         dt  ON dt.fecha        = TRUNC(i.fecha_salida);
 ```
 
-**Resultado de carga (primeros 10 registros):**
+**Resultado de carga (primeros 5 registros):**
 
-| ID_VENTA | ID_TIEMPO | ID_RUTA | ID_AEROLINEA | ID_MODELO | ID_CLIENTE | COSTO | DURACION_VUELO_HORAS | CANTIDAD_PASAJEROS |
-|----------|-----------|---------|--------------|-----------|------------|-------|----------------------|--------------------|
-| 1 | 1 | 1 | 1 | 2 | 1001234567 | 850000.00 | 10.50 | 15 |
-| 2 | 1 | 1 | 1 | 2 | 1002345678 | 850000.00 | 10.50 | 15 |
-| 3 | 2 | 2 | 2 | 1 | 1003456789 | 920000.00 | 11.25 | 12 |
-| 4 | 2 | 2 | 2 | 1 | 1004567890 | 920000.00 | 11.25 | 12 |
-| 5 | 3 | 3 | 1 | 2 | 1005678901 | 880000.00 | 10.75 | 18 |
-| 6 | 3 | 4 | 3 | 1 | 1006789012 | 750000.00 | 9.50 | 10 |
-| 7 | 4 | 5 | 2 | 2 | 1007890123 | 910000.00 | 11.00 | 14 |
-| 8 | 4 | 5 | 2 | 2 | 1008901234 | 910000.00 | 11.00 | 14 |
-| 9 | 5 | 6 | 1 | 1 | 1009012345 | 930000.00 | 11.50 | 16 |
-| 10 | 5 | 7 | 3 | 2 | 1010123456 | 870000.00 | 10.25 | 11 |
+| ID_VENTA | ID_TIEMPO | ID_RUTA | ID_AEROLINEA | COSTO | CANTIDAD_PASAJEROS |
+|----------|-----------|---------|--------------|-------|--------------------|
+| 1 | 1 | 1 | 1 | 850000.00 | 15 |
+| 2 | 2 | 2 | 2 | 920000.00 | 12 |
+| 3 | 3 | 3 | 1 | 880000.00 | 18 |
+| 4 | 4 | 5 | 2 | 910000.00 | 14 |
+| 5 | 5 | 6 | 1 | 930000.00 | 16 |
 
 **Descripción:** Query complejo que integra datos de múltiples tablas transaccionales (VUELOS, ITINERARIOS, AVIONES, AEROLINEAS, USUARIOS) con la dimensión temporal ya cargada (DIM_TIEMPO). Calcula métricas como duración del vuelo en horas y cantidad de pasajeros por vuelo.
 
