@@ -1,0 +1,82 @@
+<Schema name="Superapp_Cube4.1_Schema">
+  <Cube name="Superapp_Cube" visible="true" cache="true" enabled="true">
+    <Table name="FACT_VENTAS_VUELOS" schema="SYSTEM">
+    </Table>
+    <Dimension type="StandardDimension" visible="true" foreignKey="ID_RUTA" highCardinality="false" name="DIM_RUTA">
+      <Hierarchy name="DIM_RUTA" visible="true" hasAll="true" primaryKey="ID_RUTA">
+        <Table name="DIM_RUTA" schema="SYSTEM">
+        </Table>
+        <Level name="Ciudad_origen" visible="true" column="CIUDAD_ORIGEN" type="String" uniqueMembers="false" levelType="Regular" hideMemberIf="Never">
+        </Level>
+        <Level name="Ciudad_destino" visible="true" column="CIUDAD_DESTINO" type="String" uniqueMembers="false" levelType="Regular" hideMemberIf="Never">
+        </Level>
+        <Level name="Aeropuerto_origen" visible="true" column="AEROPUERTO_ORIGEN" type="String" uniqueMembers="false" levelType="Regular" hideMemberIf="Never">
+        </Level>
+        <Level name="Aeropuerto_destino" visible="true" column="AEROPUERTO_DESTINO" type="String" uniqueMembers="false" levelType="Regular" hideMemberIf="Never">
+        </Level>
+        <Level name="Ruta_completa" visible="true" column="RUTA_COMPLETA" type="String" uniqueMembers="true" levelType="Regular" hideMemberIf="Never">
+        </Level>
+      </Hierarchy>
+    </Dimension>
+    <Dimension type="StandardDimension" visible="true" foreignKey="ID_CLIENTE" highCardinality="false" name="DIM_CLIENTE">
+      <Hierarchy name="DIM_CLIENTE" visible="true" hasAll="true" primaryKey="ID_CLIENTE">
+        <Table name="DIM_CLIENTE" schema="SYSTEM">
+        </Table>
+        <Level name="Nombre_completo" visible="true" column="NOMBRE_COMPLETO" type="String" uniqueMembers="false" levelType="Regular" hideMemberIf="Never">
+        </Level>
+        <Level name="Email" visible="true" column="EMAIL" type="String" uniqueMembers="false" levelType="Regular" hideMemberIf="Never">
+        </Level>
+        <Level name="Ciudad_residencia" visible="true" column="CIUDAD_RESIDENCIA" type="String" uniqueMembers="false" levelType="Regular" hideMemberIf="Never">
+        </Level>
+      </Hierarchy>
+    </Dimension>
+    <Dimension type="StandardDimension" visible="true" foreignKey="ID_TIEMPO" highCardinality="false" name="DIM_TIEMPO">
+      <Hierarchy name="DIM_TIEMPO" visible="true" hasAll="true" primaryKey="ID_TIEMPO">
+        <Table name="DIM_TIEMPO" schema="SYSTEM">
+        </Table>
+        <Level name="Anio" visible="true" column="ANIO" type="Numeric" uniqueMembers="false" levelType="Regular" hideMemberIf="Never">
+        </Level>
+        <Level name="Semestre" visible="true" column="SEMESTRE" type="Numeric" uniqueMembers="false" levelType="Regular" hideMemberIf="Never">
+        </Level>
+        <Level name="Trimestre" visible="true" column="TRIMESTRE" type="Numeric" uniqueMembers="false" levelType="Regular" hideMemberIf="Never">
+        </Level>
+        <Level name="Mes" visible="true" column="MES" type="Numeric" uniqueMembers="false" levelType="Regular" hideMemberIf="Never">
+        </Level>
+        <Level name="Nombre_mes" visible="true" column="NOMBRE_MES" type="String" uniqueMembers="false" levelType="Regular" hideMemberIf="Never">
+        </Level>
+        <Level name="Dia" visible="true" column="DIA" type="Numeric" uniqueMembers="false" levelType="Regular" hideMemberIf="Never">
+        </Level>
+        <Level name="Dia_semana" visible="true" column="DIA_SEMANA" type="Numeric" uniqueMembers="false" levelType="Regular" hideMemberIf="Never">
+        </Level>
+        <Level name="Nombre_dia" visible="true" column="NOMBRE_DIA" type="String" uniqueMembers="true" levelType="Regular" hideMemberIf="Never">
+        </Level>
+        <Level name="fecha" visible="true" column="FECHA" type="Date" uniqueMembers="true" levelType="Regular" hideMemberIf="Never">
+        </Level>
+      </Hierarchy>
+    </Dimension>
+    <Dimension type="StandardDimension" visible="true" foreignKey="ID_AEROLINEA" highCardinality="false" name="DIM_AEROLINEA">
+      <Hierarchy name="DIM_AEROLINEA" visible="true" hasAll="true" primaryKey="ID_AEROLINEA">
+        <Table name="DIM_AEROLINEA" schema="SYSTEM">
+        </Table>
+        <Level name="Nombre_aerolinea" visible="true" column="NOMBRE_AEROLINEA" type="String" uniqueMembers="false" levelType="Regular" hideMemberIf="Never">
+        </Level>
+      </Hierarchy>
+    </Dimension>
+    <Dimension type="StandardDimension" visible="true" foreignKey="ID_MODELO" highCardinality="false" name="DIM_MODELO">
+      <Hierarchy name="DIM_MODELO" visible="true" hasAll="true" primaryKey="ID_MODELO">
+        <Table name="DIM_MODELO" schema="SYSTEM">
+        </Table>
+        <Level name="Nombre_modelo" visible="true" column="NOMBRE_MODELO" type="String" uniqueMembers="false" levelType="Regular" hideMemberIf="Never">
+        </Level>
+      </Hierarchy>
+    </Dimension>
+    <Measure name="Costo" column="COSTO" datatype="Numeric" aggregator="sum" visible="true">
+    </Measure>
+    <Measure name="Duracion_vuelo_horas" column="DURACION_VUELO_HORAS" datatype="Numeric" aggregator="distinct-count" visible="true">
+    </Measure>
+    <Measure name="Cantidad_pasajeros" column="CANTIDAD_PASAJEROS" datatype="Numeric" aggregator="distinct-count" visible="true">
+    </Measure>
+    <Measure name="ID_venta" column="ID_VENTA" datatype="Numeric" aggregator="distinct-count" visible="true">
+    </Measure>
+  </Cube>
+</Schema>
