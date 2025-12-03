@@ -195,12 +195,13 @@ La separación de esquemas OLTP y OLAP permite:
 │ - AEROPUERTOS   │                     │ - DIM_TIEMPO        │
 │ - AVIONES       │                     │ - DIM_RUTA          │
 │ - CIUDADES      │                     │ - DIM_AEROLINEA     │
-│ - ITINERARIOS   │                     │ - DIM_CLIENTE       │
-│ - MODELOS       │                     │ - FACT_VENTAS_VUELOS│
-│ - USUARIOS      │                     │                     │
-│ - VUELOS        │                     │   Pendiente:        │
-└─────────────────┘                     │ - Carga ETL         │
-    170 registros                       └─────────────────────┘
+│ - ITINERARIOS   │                     │ - DIM_MODELO        │
+│ - MODELOS       │                     │ - DIM_CLIENTE       │
+│ - USUARIOS      │                     │ - FACT_VENTAS_VUELOS│
+│ - VUELOS        │                     │                     │
+└─────────────────┘                     │   Pendiente:        │
+    170 registros                       │ - Carga ETL         │
+                                        └─────────────────────┘
                                          Estructura completa
 ```
 
@@ -224,7 +225,7 @@ Una vez completada la configuración del esquema IATA_OLAP (ver script anterior)
 Con la conexión establecida como usuario IATA_OLAP, se procede a la siguiente fase: el diseño e implementación del **Data Mart dimensional** utilizando el modelo de **Esquema en Estrella (Star Schema)**, que permitirá realizar análisis multidimensionales sobre las operaciones de vuelos de la aerolínea.
 
 ### Fase 2: Diseño del Data Mart 
-- [x] Diseñar modelo estrella (4 dimensiones + 1 tabla de hechos)
+- [x] Diseñar modelo estrella (5 dimensiones + 1 tabla de hechos)
 - [x] Crear tablas de dimensiones y hechos
 - [ ] Implementar proceso ETL para poblar el Data Mart (Próximo paso)
 
@@ -234,14 +235,15 @@ Se ha diseñado e implementado un modelo dimensional tipo **Esquema en Estrella*
 
 **Componentes del modelo:**
 
-**Dimensiones (4):**
+**Dimensiones (5):**
 - **DIM_TIEMPO**: Análisis temporal (fecha, año, semestre, trimestre, mes, día)
 - **DIM_RUTA**: Análisis geográfico (ciudad origen, ciudad destino, aeropuertos)
-- **DIM_AEROLINEA**: Análisis por aerolínea y modelo de avión
+- **DIM_AEROLINEA**: Análisis por aerolínea
+- **DIM_MODELO**: Análisis por modelo de avión (Airbus 320, Boeing 747)
 - **DIM_CLIENTE**: Análisis demográfico de pasajeros (ciudad de residencia)
 
 **Tabla de Hechos (1):**
-- **FACT_VENTAS_VUELOS**: Métricas de negocio (costo, duración, cantidad de pasajeros)
+- **FACT_VENTAS_VUELOS**: Métricas de negocio (costo, duración, cantidad de pasajeros) con claves foráneas a las 5 dimensiones
 
 El diseño contempla las 4 preguntas analíticas clave del caso:
 1. Aerolíneas con más vuelos a ciudades específicas por año
@@ -260,14 +262,13 @@ Una vez conectados como usuario **IATA_OLAP**, se ejecutó el script [`Creacion_
 **Objetos creados:**
 
 | Tabla | Tipo | Estado | Propósito |
-|-------|------|--------|-----------|
+|-------|------|--------|-----------|  
 | **DIM_TIEMPO** | DIMENSION | Creada | Dimensión temporal para análisis por fecha, año, semestre, mes |
 | **DIM_RUTA** | DIMENSION | Creada | Dimensión geográfica con origen-destino de vuelos |
-| **DIM_AEROLINEA** | DIMENSION | Creada | Dimensión de aerolíneas y modelos de avión |
+| **DIM_AEROLINEA** | DIMENSION | Creada | Dimensión de aerolíneas (Avianca, Latam, Wingo) |
+| **DIM_MODELO** | DIMENSION | Creada | Dimensión de modelos de avión (Airbus 320, Boeing 747) |
 | **DIM_CLIENTE** | DIMENSION | Creada | Dimensión de clientes/pasajeros con ciudad de residencia |
-| **FACT_VENTAS_VUELOS** | FACT | Creada | Tabla de hechos con métricas de ventas de vuelos |
-
-**Resultado de la ejecución:**
+| **FACT_VENTAS_VUELOS** | FACT | Creada | Tabla de hechos con métricas de ventas y FKs a 5 dimensiones |**Resultado de la ejecución:**
 ```
 ==========================================================
 Data Mart (Esquema Estrella) creado exitosamente
@@ -282,7 +283,7 @@ El Data Mart se creó exitosamente con todas las tablas dimensionales y de hecho
 ### Fase 3: Proceso ETL (Pendiente)
 - [ ] Diseñar queries de extracción desde esquema IATA (OLTP)
 - [ ] Implementar transformaciones de datos
-- [ ] Cargar dimensiones (DIM_TIEMPO, DIM_RUTA, DIM_AEROLINEA, DIM_CLIENTE)
+- [ ] Cargar dimensiones (DIM_TIEMPO, DIM_RUTA, DIM_AEROLINEA, DIM_MODELO, DIM_CLIENTE)
 - [ ] Cargar tabla de hechos (FACT_VENTAS_VUELOS)
 - [ ] Validar integridad referencial y calidad de datos
 

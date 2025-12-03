@@ -18,7 +18,7 @@ SELECT USER FROM DUAL;
 -- sobre las operaciones de reservas y vuelos de aerolíneas
 --
 -- Arquitectura:
---   - 4 Tablas de Dimensiones (DIM_*)
+--   - 5 Tablas de Dimensiones (DIM_*)
 --   - 1 Tabla de Hechos (FACT_*)
 --------------------------------------------------------
 
@@ -93,14 +93,13 @@ COMMENT ON COLUMN DIM_MODELO.NOMBRE_MODELO IS 'Nombre del modelo (ej: Airbus 320
 -- Dimensión de clientes/pasajeros para análisis demográfico
 CREATE TABLE DIM_CLIENTE (
     ID_CLIENTE          NUMBER PRIMARY KEY,
-    CEDULA              VARCHAR2(20) NOT NULL,
     NOMBRE_COMPLETO     VARCHAR2(100) NOT NULL,
     EMAIL               VARCHAR2(100) NOT NULL,
     CIUDAD_RESIDENCIA   VARCHAR2(50) NOT NULL
 );
 
 COMMENT ON TABLE DIM_CLIENTE IS 'Dimensión de clientes/pasajeros';
-COMMENT ON COLUMN DIM_CLIENTE.CEDULA IS 'Cédula del pasajero';
+COMMENT ON COLUMN DIM_CLIENTE.ID_CLIENTE IS 'Clave primaria - identificador único del cliente';
 COMMENT ON COLUMN DIM_CLIENTE.NOMBRE_COMPLETO IS 'Nombre y apellido concatenados';
 COMMENT ON COLUMN DIM_CLIENTE.CIUDAD_RESIDENCIA IS 'Ciudad de residencia del pasajero';
 
@@ -109,13 +108,13 @@ COMMENT ON COLUMN DIM_CLIENTE.CIUDAD_RESIDENCIA IS 'Ciudad de residencia del pas
 --------------------------------------------------------
 -- Tabla central del modelo estrella con métricas de ventas
 CREATE TABLE FACT_VENTAS_VUELOS (
-    ID_VENTA                NUMBER GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+    ID_VENTA                NUMBER NOT NULL,
     ID_TIEMPO               NUMBER NOT NULL,
     ID_RUTA                 NUMBER NOT NULL,
     ID_AEROLINEA            NUMBER NOT NULL,
     ID_MODELO               NUMBER NOT NULL,
     ID_CLIENTE              NUMBER NOT NULL,
-    COSTO                   NUMBER NOT NULL,
+    COSTO                   NUMBER(10,2) NOT NULL,
     DURACION_VUELO_HORAS    NUMBER(5,2),
     CANTIDAD_PASAJEROS      NUMBER DEFAULT 1,
     
@@ -157,7 +156,7 @@ CREATE INDEX IDX_FACT_TIEMPO_MODELO ON FACT_VENTAS_VUELOS(ID_TIEMPO, ID_MODELO);
 -- VERIFICACIÓN DE TABLAS CREADAS
 --------------------------------------------------------
 
-SELECT *
+SELECT table_name, comments
 FROM user_tab_comments 
 WHERE table_name LIKE 'DIM_%' OR table_name LIKE 'FACT_%'
 ORDER BY table_name;
@@ -167,7 +166,7 @@ ORDER BY table_name;
 -- Data Mart con esquema estrella creado:
 --   - 5 Tablas de Dimensiones (DIM_TIEMPO, DIM_RUTA, DIM_AEROLINEA, DIM_MODELO, DIM_CLIENTE)
 --   - 1 Tabla de Hechos (FACT_VENTAS_VUELOS)
---   - 7 Índices para optimización
+--   - 7 índices para optimización
 --
 -- Próximo paso: Ejecutar proceso ETL para poblar las tablas
 --------------------------------------------------------
