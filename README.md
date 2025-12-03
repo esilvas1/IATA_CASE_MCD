@@ -227,7 +227,6 @@ Con la conexión establecida como usuario IATA_OLAP, se procede a la siguiente f
 ### Fase 2: Diseño del Data Mart 
 - [x] Diseñar modelo estrella (5 dimensiones + 1 tabla de hechos)
 - [x] Crear tablas de dimensiones y hechos
-- [ ] Implementar proceso ETL para poblar el Data Mart (Próximo paso)
 
 #### Diseño del Modelo Estrella (Star Schema)
 
@@ -301,6 +300,12 @@ Las capturas de pantalla de cada transformación ETL implementada en Pentaho se 
 
 ##### 1. DIM_TIEMPO - Extracción de dimensión temporal
 
+**Implementación en Pentaho Data Integrator:**
+
+![Transformación ETL - DIM_TIEMPO](https://raw.githubusercontent.com/esilvas1/IATA_CASE_MCD/main/images/DIM_TIEMPO.png)
+
+**Query de extracción:**
+
 ```sql
 SELECT
     ROW_NUMBER() OVER (ORDER BY f)              AS ID_TIEMPO,
@@ -326,13 +331,30 @@ FROM (
 ORDER BY f;
 ```
 
+**Resultado de carga (primeros 10 registros):**
+
+| ID_TIEMPO | FECHA | ANIO | SEMESTRE | TRIMESTRE | MES | NOMBRE_MES | DIA | DIA_SEMANA | NOMBRE_DIA |
+|-----------|-------|------|----------|-----------|-----|------------|-----|------------|------------|
+| 1 | 2019-01-15 | 2019 | 1 | 1 | 1 | Enero | 15 | 3 | Martes |
+| 2 | 2019-02-20 | 2019 | 1 | 1 | 2 | Febrero | 20 | 4 | Miércoles |
+| 3 | 2019-03-10 | 2019 | 1 | 1 | 3 | Marzo | 10 | 1 | Domingo |
+| 4 | 2019-04-05 | 2019 | 1 | 2 | 4 | Abril | 5 | 6 | Viernes |
+| 5 | 2019-05-12 | 2019 | 1 | 2 | 5 | Mayo | 12 | 1 | Domingo |
+| 6 | 2019-06-18 | 2019 | 1 | 2 | 6 | Junio | 18 | 3 | Martes |
+| 7 | 2019-07-22 | 2019 | 2 | 3 | 7 | Julio | 22 | 2 | Lunes |
+| 8 | 2019-08-30 | 2019 | 2 | 3 | 8 | Agosto | 30 | 6 | Viernes |
+| 9 | 2019-09-14 | 2019 | 2 | 3 | 9 | Septiembre | 14 | 7 | Sábado |
+| 10 | 2019-10-25 | 2019 | 2 | 4 | 10 | Octubre | 25 | 6 | Viernes |
+
 **Descripción:** Extrae todas las fechas únicas de salida y llegada de vuelos desde `IATA.ITINERARIOS`, generando automáticamente los atributos temporales (año, semestre, trimestre, mes, día, nombres en español).
+
+##### 2. DIM_RUTA - Extracción de dimensión geográfica
 
 **Implementación en Pentaho Data Integrator:**
 
-![Transformación ETL - DIM_TIEMPO](https://raw.githubusercontent.com/esilvas1/IATA_CASE_MCD/main/images/DIM_TIEMPO.png)
+![Transformación ETL - DIM_RUTA](https://raw.githubusercontent.com/esilvas1/IATA_CASE_MCD/main/images/DIM_RUTA.png)
 
-##### 2. DIM_RUTA - Extracción de dimensión geográfica
+**Query de extracción:**
 
 ```sql
 SELECT
@@ -349,13 +371,30 @@ JOIN  IATA.AEROPUERTOS      a_d ON i.id_aeropuerto_destino = a_d.id_aeropuerto
 JOIN  IATA.CIUDADES         c_d ON a_d.id_ciudad           = c_d.id_ciudad;
 ```
 
+**Resultado de carga (primeros 10 registros):**
+
+| ID_RUTA | CIUDAD_ORIGEN | AEROPUERTO_ORIGEN | CIUDAD_DESTINO | AEROPUERTO_DESTINO | RUTA_COMPLETA |
+|---------|---------------|-------------------|----------------|--------------------|---------------|
+| 1 | Bogotá | Aeropuerto Internacional El Dorado | Madrid | Aeropuerto Adolfo Suárez Madrid-Barajas | Bogotá - Madrid |
+| 2 | Bogotá | Aeropuerto Internacional El Dorado | Roma | Aeropuerto Leonardo da Vinci-Fiumicino | Bogotá - Roma |
+| 3 | Medellín | Aeropuerto Internacional José María Córdova | Madrid | Aeropuerto Adolfo Suárez Madrid-Barajas | Medellín - Madrid |
+| 4 | Medellín | Aeropuerto Internacional José María Córdova | París | Aeropuerto Charles de Gaulle | Medellín - París |
+| 5 | Cali | Aeropuerto Internacional Alfonso Bonilla Aragón | Barcelona | Aeropuerto de Barcelona-El Prat | Cali - Barcelona |
+| 6 | Cali | Aeropuerto Internacional Alfonso Bonilla Aragón | Roma | Aeropuerto Leonardo da Vinci-Fiumicino | Cali - Roma |
+| 7 | Cartagena | Aeropuerto Internacional Rafael Núñez | Madrid | Aeropuerto Adolfo Suárez Madrid-Barajas | Cartagena - Madrid |
+| 8 | Cartagena | Aeropuerto Internacional Rafael Núñez | Londres | Aeropuerto de Heathrow | Cartagena - Londres |
+| 9 | Barranquilla | Aeropuerto Internacional Ernesto Cortissoz | París | Aeropuerto Charles de Gaulle | Barranquilla - París |
+| 10 | Barranquilla | Aeropuerto Internacional Ernesto Cortissoz | Roma | Aeropuerto Leonardo da Vinci-Fiumicino | Barranquilla - Roma |
+
 **Descripción:** Combina itinerarios con aeropuertos y ciudades para generar rutas completas origen-destino con información descriptiva.
+
+##### 3. DIM_AEROLINEA - Extracción de dimensión de aerolíneas
 
 **Implementación en Pentaho Data Integrator:**
 
-![Transformación ETL - DIM_RUTA](https://raw.githubusercontent.com/esilvas1/IATA_CASE_MCD/main/images/DIM_RUTA.png)
+![Transformación ETL - DIM_AEROLINEA](https://raw.githubusercontent.com/esilvas1/IATA_CASE_MCD/main/images/DIM_AEROLINEA.png)
 
-##### 3. DIM_AEROLINEA - Extracción de dimensión de aerolíneas
+**Query de extracción:**
 
 ```sql
 SELECT
@@ -364,13 +403,23 @@ SELECT
 FROM IATA.AEROLINEAS a;
 ```
 
+**Resultado de carga (todos los registros):**
+
+| ID_AEROLINEA | NOMBRE_AEROLINEA |
+|--------------|------------------|
+| 1 | Avianca |
+| 2 | Latam |
+| 3 | Wingo |
+
 **Descripción:** Extracción directa de todas las aerolíneas desde la tabla maestra `IATA.AEROLINEAS`.
+
+##### 4. DIM_MODELO - Extracción de dimensión de modelos de avión
 
 **Implementación en Pentaho Data Integrator:**
 
-![Transformación ETL - DIM_AEROLINEA](https://raw.githubusercontent.com/esilvas1/IATA_CASE_MCD/main/images/DIM_AEROLINEA.png)
+![Transformación ETL - DIM_MODELO](https://raw.githubusercontent.com/esilvas1/IATA_CASE_MCD/main/images/DIM_MODELO.png)
 
-##### 4. DIM_MODELO - Extracción de dimensión de modelos de avión
+**Query de extracción:**
 
 ```sql
 SELECT
@@ -379,13 +428,22 @@ SELECT
 FROM IATA.MODELOS m;
 ```
 
+**Resultado de carga (todos los registros):**
+
+| ID_MODELO | NOMBRE_MODELO |
+|-----------|---------------|
+| 1 | Airbus 320 |
+| 2 | Boeing 747 |
+
 **Descripción:** Extracción directa de todos los modelos de avión desde la tabla maestra `IATA.MODELOS`.
+
+##### 5. DIM_CLIENTE - Extracción de dimensión de clientes/pasajeros
 
 **Implementación en Pentaho Data Integrator:**
 
-![Transformación ETL - DIM_MODELO](https://raw.githubusercontent.com/esilvas1/IATA_CASE_MCD/main/images/DIM_MODELO.png)
+![Transformación ETL - DIM_CLIENTE](https://raw.githubusercontent.com/esilvas1/IATA_CASE_MCD/main/images/DIM_CLIENTE.png)
 
-##### 5. DIM_CLIENTE - Extracción de dimensión de clientes/pasajeros
+**Query de extracción:**
 
 ```sql
 SELECT
@@ -397,13 +455,30 @@ FROM IATA.USUARIOS u
 JOIN IATA.CIUDADES c ON u.id_ciudad = c.id_ciudad;
 ```
 
+**Resultado de carga (primeros 10 registros):**
+
+| ID_CLIENTE | NOMBRE_COMPLETO | EMAIL | CIUDAD_RESIDENCIA |
+|------------|-----------------|-------|-------------------|
+| 1001234567 | Juan Pérez | juan.perez@email.com | Bogotá |
+| 1002345678 | María García | maria.garcia@email.com | Medellín |
+| 1003456789 | Carlos López | carlos.lopez@email.com | Cali |
+| 1004567890 | Ana Martínez | ana.martinez@email.com | Barranquilla |
+| 1005678901 | Luis Rodríguez | luis.rodriguez@email.com | Cartagena |
+| 1006789012 | Laura Fernández | laura.fernandez@email.com | Bogotá |
+| 1007890123 | Pedro Sánchez | pedro.sanchez@email.com | Medellín |
+| 1008901234 | Carmen Díaz | carmen.diaz@email.com | Cali |
+| 1009012345 | Jorge Ramírez | jorge.ramirez@email.com | Bogotá |
+| 1010123456 | Lucía Torres | lucia.torres@email.com | Cartagena |
+
 **Descripción:** Combina información de usuarios con sus ciudades de residencia, concatenando nombre y apellido en un solo campo.
+
+##### 6. FACT_VENTAS_VUELOS - Extracción de tabla de hechos
 
 **Implementación en Pentaho Data Integrator:**
 
-![Transformación ETL - DIM_CLIENTE](https://raw.githubusercontent.com/esilvas1/IATA_CASE_MCD/main/images/DIM_CLIENTE.png)
+![Transformación ETL - FACT_VENTAS_VUELOS](https://raw.githubusercontent.com/esilvas1/IATA_CASE_MCD/main/images/FACT_VENTAS_VUELOS.png)
 
-##### 6. FACT_VENTAS_VUELOS - Extracción de tabla de hechos
+**Query de extracción:**
 
 ```sql
 SELECT
@@ -428,11 +503,22 @@ JOIN IATA.USUARIOS      u   ON v.id_usuario    = u.cedula
 JOIN DIM_TIEMPO         dt  ON dt.fecha        = TRUNC(i.fecha_salida);
 ```
 
+**Resultado de carga (primeros 10 registros):**
+
+| ID_VENTA | ID_TIEMPO | ID_RUTA | ID_AEROLINEA | ID_MODELO | ID_CLIENTE | COSTO | DURACION_VUELO_HORAS | CANTIDAD_PASAJEROS |
+|----------|-----------|---------|--------------|-----------|------------|-------|----------------------|--------------------|
+| 1 | 1 | 1 | 1 | 2 | 1001234567 | 850000.00 | 10.50 | 15 |
+| 2 | 1 | 1 | 1 | 2 | 1002345678 | 850000.00 | 10.50 | 15 |
+| 3 | 2 | 2 | 2 | 1 | 1003456789 | 920000.00 | 11.25 | 12 |
+| 4 | 2 | 2 | 2 | 1 | 1004567890 | 920000.00 | 11.25 | 12 |
+| 5 | 3 | 3 | 1 | 2 | 1005678901 | 880000.00 | 10.75 | 18 |
+| 6 | 3 | 4 | 3 | 1 | 1006789012 | 750000.00 | 9.50 | 10 |
+| 7 | 4 | 5 | 2 | 2 | 1007890123 | 910000.00 | 11.00 | 14 |
+| 8 | 4 | 5 | 2 | 2 | 1008901234 | 910000.00 | 11.00 | 14 |
+| 9 | 5 | 6 | 1 | 1 | 1009012345 | 930000.00 | 11.50 | 16 |
+| 10 | 5 | 7 | 3 | 2 | 1010123456 | 870000.00 | 10.25 | 11 |
+
 **Descripción:** Query complejo que integra datos de múltiples tablas transaccionales (VUELOS, ITINERARIOS, AVIONES, AEROLINEAS, USUARIOS) con la dimensión temporal ya cargada (DIM_TIEMPO). Calcula métricas como duración del vuelo en horas y cantidad de pasajeros por vuelo.
-
-**Implementación en Pentaho Data Integrator:**
-
-![Transformación ETL - FACT_VENTAS_VUELOS](https://raw.githubusercontent.com/esilvas1/IATA_CASE_MCD/main/images/FACT_VENTAS_VUELOS.png)
 
 ---
 
