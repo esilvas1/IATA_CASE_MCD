@@ -251,9 +251,7 @@ El diseño contempla las 4 preguntas analíticas clave del caso:
 
 **Diagrama del Modelo Estrella:**
 
-<p align="center">
-  <img src="https://raw.githubusercontent.com/esilvas1/IATA_CASE_MCD/main/images/modelo_estrella.png" alt="Modelo Estrella - Data Mart IATA" width="800"/>
-</p>
+![Diagrama del Modelo Estrella](https://raw.githubusercontent.com/esilvas1/IATA_CASE_MCD/main/images/modelo_estrella.png)
 
 #### Ejecución del Script de Creación
 

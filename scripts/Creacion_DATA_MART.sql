@@ -66,20 +66,29 @@ COMMENT ON COLUMN DIM_RUTA.RUTA_COMPLETA IS 'Concatenación: Ciudad Origen - Ciu
 --------------------------------------------------------
 -- DIMENSIÓN 3: DIM_AEROLINEA
 --------------------------------------------------------
--- Dimensión de aerolíneas y modelos de aviones
+-- Dimensión de aerolíneas
 CREATE TABLE DIM_AEROLINEA (
     ID_AEROLINEA        NUMBER PRIMARY KEY,
-    NOMBRE_AEROLINEA    VARCHAR2(50) NOT NULL,
-    ID_MODELO           NUMBER NOT NULL,
+    NOMBRE_AEROLINEA    VARCHAR2(50) NOT NULL
+);
+
+COMMENT ON TABLE DIM_AEROLINEA IS 'Dimensión de aerolíneas';
+COMMENT ON COLUMN DIM_AEROLINEA.NOMBRE_AEROLINEA IS 'Nombre de la aerolínea (ej: Avianca, Latam, Wingo)';
+
+--------------------------------------------------------
+-- DIMENSIÓN 4: DIM_MODELO
+--------------------------------------------------------
+-- Dimensión de modelos de aviones
+CREATE TABLE DIM_MODELO (
+    ID_MODELO           NUMBER PRIMARY KEY,
     NOMBRE_MODELO       VARCHAR2(50) NOT NULL
 );
 
-COMMENT ON TABLE DIM_AEROLINEA IS 'Dimensión de aerolíneas y modelos de aviones';
-COMMENT ON COLUMN DIM_AEROLINEA.ID_MODELO IS 'Identificador del modelo de avión';
-COMMENT ON COLUMN DIM_AEROLINEA.NOMBRE_MODELO IS 'Nombre del modelo (ej: Airbus 320, Boeing 747)';
+COMMENT ON TABLE DIM_MODELO IS 'Dimensión de modelos de avión';
+COMMENT ON COLUMN DIM_MODELO.NOMBRE_MODELO IS 'Nombre del modelo (ej: Airbus 320, Boeing 747)';
 
 --------------------------------------------------------
--- DIMENSIÓN 4: DIM_CLIENTE
+-- DIMENSIÓN 5: DIM_CLIENTE
 --------------------------------------------------------
 -- Dimensión de clientes/pasajeros para análisis demográfico
 CREATE TABLE DIM_CLIENTE (
@@ -100,10 +109,11 @@ COMMENT ON COLUMN DIM_CLIENTE.CIUDAD_RESIDENCIA IS 'Ciudad de residencia del pas
 --------------------------------------------------------
 -- Tabla central del modelo estrella con métricas de ventas
 CREATE TABLE FACT_VENTAS_VUELOS (
-    ID_VENTA                NUMBER PRIMARY KEY,
+    ID_VENTA                NUMBER GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
     ID_TIEMPO               NUMBER NOT NULL,
     ID_RUTA                 NUMBER NOT NULL,
     ID_AEROLINEA            NUMBER NOT NULL,
+    ID_MODELO               NUMBER NOT NULL,
     ID_CLIENTE              NUMBER NOT NULL,
     COSTO                   NUMBER NOT NULL,
     DURACION_VUELO_HORAS    NUMBER(5,2),
@@ -116,13 +126,17 @@ CREATE TABLE FACT_VENTAS_VUELOS (
         REFERENCES DIM_RUTA(ID_RUTA),
     CONSTRAINT FK_AEROLINEA FOREIGN KEY (ID_AEROLINEA) 
         REFERENCES DIM_AEROLINEA(ID_AEROLINEA),
+    CONSTRAINT FK_MODELO FOREIGN KEY (ID_MODELO) 
+        REFERENCES DIM_MODELO(ID_MODELO),
     CONSTRAINT FK_CLIENTE FOREIGN KEY (ID_CLIENTE) 
         REFERENCES DIM_CLIENTE(ID_CLIENTE)
 );
 
 COMMENT ON TABLE FACT_VENTAS_VUELOS IS 'Tabla de hechos con métricas de ventas de vuelos';
+COMMENT ON COLUMN FACT_VENTAS_VUELOS.ID_VENTA IS 'Clave primaria autoincremental de cada venta';
 COMMENT ON COLUMN FACT_VENTAS_VUELOS.COSTO IS 'Costo del vuelo en pesos colombianos';
 COMMENT ON COLUMN FACT_VENTAS_VUELOS.DURACION_VUELO_HORAS IS 'Duración del vuelo en horas';
+COMMENT ON COLUMN FACT_VENTAS_VUELOS.CANTIDAD_PASAJEROS IS 'Número de pasajeros (por defecto 1)';
 
 --------------------------------------------------------
 -- ÍNDICES PARA OPTIMIZACIÓN DE CONSULTAS
@@ -132,10 +146,12 @@ COMMENT ON COLUMN FACT_VENTAS_VUELOS.DURACION_VUELO_HORAS IS 'Duración del vuel
 CREATE INDEX IDX_FACT_TIEMPO ON FACT_VENTAS_VUELOS(ID_TIEMPO);
 CREATE INDEX IDX_FACT_RUTA ON FACT_VENTAS_VUELOS(ID_RUTA);
 CREATE INDEX IDX_FACT_AEROLINEA ON FACT_VENTAS_VUELOS(ID_AEROLINEA);
+CREATE INDEX IDX_FACT_MODELO ON FACT_VENTAS_VUELOS(ID_MODELO);
 CREATE INDEX IDX_FACT_CLIENTE ON FACT_VENTAS_VUELOS(ID_CLIENTE);
 
--- Índice compuesto para análisis temporal por aerolínea
+-- Índices compuestos para análisis multidimensional
 CREATE INDEX IDX_FACT_TIEMPO_AEROLINEA ON FACT_VENTAS_VUELOS(ID_TIEMPO, ID_AEROLINEA);
+CREATE INDEX IDX_FACT_TIEMPO_MODELO ON FACT_VENTAS_VUELOS(ID_TIEMPO, ID_MODELO);
 
 --------------------------------------------------------
 -- VERIFICACIÓN DE TABLAS CREADAS
@@ -149,9 +165,9 @@ ORDER BY table_name;
 --------------------------------------------------------
 -- RESULTADO ESPERADO:
 -- Data Mart con esquema estrella creado:
---   - 4 Tablas de Dimensiones (DIM_TIEMPO, DIM_RUTA, DIM_AEROLINEA, DIM_CLIENTE)
+--   - 5 Tablas de Dimensiones (DIM_TIEMPO, DIM_RUTA, DIM_AEROLINEA, DIM_MODELO, DIM_CLIENTE)
 --   - 1 Tabla de Hechos (FACT_VENTAS_VUELOS)
---   - 5 Índices para optimización
+--   - 7 Índices para optimización
 --
 -- Próximo paso: Ejecutar proceso ETL para poblar las tablas
 --------------------------------------------------------
