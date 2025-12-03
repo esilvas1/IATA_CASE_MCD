@@ -522,128 +522,73 @@ JOIN DIM_TIEMPO         dt  ON dt.fecha        = TRUNC(i.fecha_salida);
 - [ ] Publicar cubo para análisis multidimensional
 - [ ] Validar conectividad y consultas MDX
 
-#### Creación del Cubo OLAP con Schema Workbench
+#### Creación de Cubos OLAP con Schema Workbench
 
-Para habilitar análisis multidimensional interactivo sobre el Data Mart, se ha diseñado un **cubo OLAP** utilizando la herramienta **Pentaho Schema Workbench**. Esta herramienta permite definir esquemas multidimensionales que luego son utilizados por el motor Mondrian para ejecutar consultas MDX.
+Para habilitar análisis multidimensional interactivo sobre el Data Mart, se han diseñado **dos cubos OLAP** utilizando la herramienta **Pentaho Schema Workbench**. Esta herramienta permite definir esquemas multidimensionales que luego son utilizados por el motor Mondrian para ejecutar consultas MDX.
 
 **Herramientas utilizadas:**
 - **Pentaho Schema Workbench**: Editor visual para diseñar esquemas OLAP
 - **LinceBI**: Plataforma de Business Intelligence para visualización y análisis interactivo
 - **Mondrian**: Motor OLAP que interpreta el esquema XML
 
-**Archivo generado:** [`CubeOLAP.xml`](https://github.com/esilvas1/IATA_CASE_MCD/blob/main/scripts/CubeOLAP.xml)
+**¿Por qué dos cubos OLAP?**
 
-Este archivo XML contiene la definición completa del cubo multidimensional, incluyendo:
+Se crearon dos cubos con configuraciones distintas debido a que las **jerarquías de las dimensiones** deben ajustarse según la prioridad analítica de cada pregunta de negocio. En particular, la dimensión `DIM_RUTA` requiere diferentes ordenamientos jerárquicos según si se analiza desde el punto de vista del **destino** o del **origen** de los vuelos.
 
-##### Estructura del Cubo
+**Archivos generados:**
 
-**Nombre del esquema:** `Superapp_Cube_Schema`  
-**Nombre del cubo:** `Superapp_Cube`
+| Cubo | Archivo | Uso |
+|------|---------|-----|
+| **Cubo 4.1** | [`Superapp_Cube4.1_Schema.xml`](https://github.com/esilvas1/IATA_CASE_MCD/blob/main/scripts/Superapp_Cube4.1_Schema.xml) | Para resolver las **preguntas 1, 2 y 3** (análisis enfocado en destinos) |
+| **Cubo 4.2** | [`Superapp_Cube4.2_Schema.xml`](https://github.com/esilvas1/IATA_CASE_MCD/blob/main/scripts/Superapp_Cube4.2_Schema.xml) | Para resolver la **pregunta 4** (análisis enfocado en origen/residencia) |
 
-**Tabla de hechos:**
-- `FACT_VENTAS_VUELOS` (esquema SYSTEM)
+**Regla de uso:**
+- **Cubo 4.1 (Superapp_Cube4.1_Schema)**: Para los tres primeros requerimientos de análisis
+- **Cubo 4.2 (Superapp_Cube4.2_Schema)**: Para el último requerimiento de análisis
 
-**Dimensiones configuradas (5):**
+Esta separación garantiza que las jerarquías dimensionales estén optimizadas para cada tipo de consulta analítica, facilitando el analisis y la navegación intuitiva en LinceBI.
 
-1. **DIM_RUTA** - Dimensión geográfica con jerarquía:
-   - Ciudad origen
-   - Aeropuerto origen
-   - Ciudad destino
-   - Aeropuerto destino
-   - Ruta completa
 
-2. **DIM_CLIENTE** - Dimensión de clientes con jerarquía:
-   - Nombre completo
-   - Email
-   - Ciudad de residencia
+##### Diferencias Clave entre Cubos
 
-3. **DIM_TIEMPO** - Dimensión temporal con jerarquía:
-   - Fecha
-   - Año
-   - Semestre
-   - Trimestre
-   - Mes
-   - Nombre del mes
-   - Día
-   - Día de la semana
-   - Nombre del día
+**Cubo 4.1 (Superapp_Cube4.1_Schema):**
 
-4. **DIM_AEROLINEA** - Dimensión de aerolíneas:
-   - Nombre de aerolínea
+![Diseño del Cubo OLAP 4.1 en Schema Workbench](https://raw.githubusercontent.com/esilvas1/IATA_CASE_MCD/main/images/cubeOlap4.1.PNG)
 
-5. **DIM_MODELO** - Dimensión de modelos de avión:
-   - Nombre del modelo
+```
+DIM_RUTA Jerarquía:
+  └─ Ciudad_destino (nivel 1 - más alto)
+     └─ Ciudad_origen (nivel 2)
+        └─ Aeropuerto_origen (nivel 3)
+           └─ Aeropuerto_destino (nivel 4)
+              └─ Ruta_completa (nivel 5 - más bajo)
+```
 
-**Medidas definidas (4):**
+**Uso:** Análisis que priorizan el **destino** como punto de partida del análisis:
+- Pregunta 1: ¿Qué aerolíneas vuelan más a **ciudades destino** específicas?
+- Pregunta 2: ¿Cuánto recaudan las aerolíneas por semestre?
+- Pregunta 3: ¿Qué modelos de avión realizan más vuelos?
 
-| Medida | Columna | Tipo | Agregador |
-|--------|---------|------|-----------|
-| **Costo** | COSTO | Integer | distinct-count |
-| **Duración vuelo (horas)** | DURACION_VUELO_HORAS | Integer | distinct-count |
-| **Cantidad pasajeros** | CANTIDAD_PASAJEROS | Integer | distinct-count |
-| **ID venta** | ID_VENTA | Numeric | distinct-count |
+**Cubo 4.2 (Superapp_Cube4.2_Schema):**
 
-##### Características del Cubo
+![Diseño del Cubo OLAP 4.2 en Schema Workbench](https://raw.githubusercontent.com/esilvas1/IATA_CASE_MCD/main/images/cubeOlap4.2.PNG)
 
-**Jerarquías definidas:**
-- Cada dimensión tiene una jerarquía con niveles de agregación
-- Ejemplo DIM_TIEMPO: Año → Semestre → Trimestre → Mes → Día
-- Ejemplo DIM_RUTA: Ciudad origen → Aeropuerto origen → Ciudad destino
+```
+DIM_RUTA Jerarquía:
+  └─ Ciudad_origen (nivel 1 - más alto)
+     └─ Ciudad_destino (nivel 2)
+        └─ Aeropuerto_origen (nivel 3)
+           └─ Aeropuerto_destino (nivel 4)
+              └─ Ruta_completa (nivel 5 - más bajo)
+```
 
-**Configuración de relaciones:**
-- Claves foráneas: `ID_RUTA`, `ID_CLIENTE`, `ID_TIEMPO`, `ID_AEROLINEA`, `ID_MODELO`
-- Claves primarias: Definidas en cada tabla dimensional
+**Uso:** Análisis que priorizan el **origen/residencia** como punto de partida del análisis:
+- Pregunta 4: ¿Desde qué **ciudades de residencia** los habitantes viajan más?
 
-**Propiedades del cubo:**
-- Visible: Sí
-- Cache: Habilitado
-- Enabled: Sí
 
-##### Implementación en LinceBI
-
-**LinceBI** es una plataforma de Business Intelligence de código abierto basada en Pentaho que permite:
-- **Análisis multidimensional (OLAP)**: Exploración interactiva de datos mediante drag-and-drop
-- **Consultas MDX**: Motor Mondrian ejecuta consultas sobre el cubo definido
-- **Dashboards interactivos**: Visualizaciones dinámicas con filtros y drill-down
-- **Reportes ad-hoc**: Creación de reportes personalizados sin código
-
-**Proceso de implementación (pendiente):**
-
-1. **Importar el esquema OLAP**:
-   - Subir el archivo `CubeOLAP.xml` al servidor LinceBI
-   - Configurar la conexión a la base de datos Oracle (esquema IATA_OLAP)
-
-2. **Publicar el cubo**:
-   - Validar el esquema XML en LinceBI
-   - Verificar conexiones a las tablas dimensionales y de hechos
-   - Publicar el cubo para hacerlo disponible
-
-3. **Crear análisis interactivos**:
-   - Utilizar Saiku (herramienta de LinceBI) para análisis OLAP
-   - Arrastrar dimensiones y medidas para crear cubos pivote
-   - Responder preguntas analíticas mediante exploración visual
-
-##### Preguntas de Negocio que se Responderán
-
-Con este cubo OLAP implementado en LinceBI, se podrán responder las 4 preguntas analíticas clave del caso:
-
-1. **¿Qué aerolíneas realizan más vuelos hacia determinadas ciudades por año?**
-   - Dimensiones: DIM_AEROLINEA, DIM_RUTA (ciudad destino), DIM_TIEMPO (año)
-   - Medida: Cantidad de vuelos (count distinct ID_VENTA)
-
-2. **¿Cuánto recaudan las aerolíneas por semestre?**
-   - Dimensiones: DIM_AEROLINEA, DIM_TIEMPO (semestre, año)
-   - Medida: Suma de COSTO
-
-3. **¿Qué modelos de avión realizan más vuelos por año?**
-   - Dimensiones: DIM_MODELO, DIM_TIEMPO (año)
-   - Medida: Cantidad de vuelos
-
-4. **¿Desde qué ciudades los habitantes realizan más viajes por año?**
-   - Dimensiones: DIM_CLIENTE (ciudad residencia), DIM_TIEMPO (año)
-   - Medida: Cantidad de vuelos
-
-**Ver archivo completo del cubo:** [`CubeOLAP.xml`](https://github.com/esilvas1/IATA_CASE_MCD/blob/main/scripts/CubeOLAP.xml)
+**Ver archivos completos de los cubos:**
+- [`Superapp_Cube4.1_Schema.xml`](https://github.com/esilvas1/IATA_CASE_MCD/blob/main/scripts/Superapp_Cube4.1_Schema.xml) - Preguntas 1, 2, 3
+- [`Superapp_Cube4.2_Schema.xml`](https://github.com/esilvas1/IATA_CASE_MCD/blob/main/scripts/Superapp_Cube4.2_Schema.xml) - Pregunta 4
 
 ### Fase 5: Análisis y Reporting (Pendiente)
 - [ ] Ejecutar análisis OLAP en LinceBI
