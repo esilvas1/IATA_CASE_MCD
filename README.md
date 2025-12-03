@@ -590,17 +590,126 @@ DIM_RUTA Jerarquía:
 - [`Superapp_Cube4.1_Schema.xml`](https://github.com/esilvas1/IATA_CASE_MCD/blob/main/scripts/Superapp_Cube4.1_Schema.xml) - Preguntas 1, 2, 3
 - [`Superapp_Cube4.2_Schema.xml`](https://github.com/esilvas1/IATA_CASE_MCD/blob/main/scripts/Superapp_Cube4.2_Schema.xml) - Pregunta 4
 
-### Fase 5: Análisis y Reporting (Pendiente)
-- [ ] Ejecutar análisis OLAP en LinceBI
-- [ ] Crear dashboards interactivos
-- [ ] Generar reportes de negocio
-- [ ] Documentar insights y hallazgos
+### Fase 5: Análisis y Visualización en LinceBI
+- [x] Implementar cubos OLAP en servidor LinceBI
+- [x] Ejecutar análisis OLAP interactivo con Saiku
+- [x] Responder las 4 preguntas analíticas del caso
+- [x] Generar visualizaciones de negocio
+
+#### Análisis OLAP con LinceBI
+
+Una vez implementados los cubos OLAP en el servidor **LinceBI**, se procedió a realizar los análisis multidimensionales interactivos utilizando la herramienta **Saiku Analytics**. Esta herramienta permite explorar los datos mediante operaciones de drill-down, slice, dice y pivot sobre las dimensiones y medidas definidas en los cubos.
+
+**Plataforma utilizada:**
+- **LinceBI**: Plataforma de Business Intelligence basada en Pentaho
+- **Saiku Analytics**: Interfaz visual para consultas MDX sobre cubos OLAP
+- **Motor Mondrian**: Procesamiento de consultas multidimensionales
+
+##### Pregunta 1: ¿Qué aerolíneas realizan más vuelos hacia determinadas ciudades por año?
+
+**Cubo utilizado:** `Superapp_Cube4.1_Schema` (prioridad en ciudad destino)
+
+**Dimensiones analizadas:**
+- DIM_AEROLINEA (Nombre de aerolínea)
+- DIM_RUTA (Ciudad destino)
+- DIM_TIEMPO (Año)
+
+**Medida:** COUNT DISTINCT(ID_VENTA) - Cantidad de vuelos
+
+**Resultado del análisis en LinceBI:**
+
+![Análisis LinceBI - Pregunta 1](https://raw.githubusercontent.com/esilvas1/IATA_CASE_MCD/main/images/LinceBI1.png)
+
+**Insights obtenidos:**
+- Visualización de las aerolíneas con mayor frecuencia de vuelos hacia ciudades específicas
+- Análisis temporal por año para identificar tendencias
+- Comparación entre aerolíneas (Avianca, Latam, Wingo) por destino
+- Identificación de rutas más operadas por cada aerolínea
+
+---
+
+##### Pregunta 2: ¿Cuánto recaudan las aerolíneas por semestre?
+
+**Cubo utilizado:** `Superapp_Cube4.1_Schema`
+
+**Dimensiones analizadas:**
+- DIM_AEROLINEA (Nombre de aerolínea)
+- DIM_TIEMPO (Semestre, Año)
+
+**Medida:** SUM(COSTO) - Recaudación total
+
+**Resultado del análisis en LinceBI:**
+
+![Análisis LinceBI - Pregunta 2](https://raw.githubusercontent.com/esilvas1/IATA_CASE_MCD/main/images/LinceBI2.PNG)
+
+**Insights obtenidos:**
+- Recaudación total por aerolínea segmentada por semestre
+- Comparación de ingresos entre semestres (temporada alta vs baja)
+- Identificación de aerolíneas con mayor participación en el mercado
+- Análisis de estacionalidad en las ventas
+
+---
+
+##### Pregunta 3: ¿Qué modelos de avión realizan más vuelos por año?
+
+**Cubo utilizado:** `Superapp_Cube4.1_Schema`
+
+**Dimensiones analizadas:**
+- DIM_MODELO (Nombre del modelo)
+- DIM_TIEMPO (Año)
+
+**Medida:** COUNT DISTINCT(ID_VENTA) - Cantidad de vuelos
+
+**Resultado del análisis en LinceBI:**
+
+![Análisis LinceBI - Pregunta 3](https://raw.githubusercontent.com/esilvas1/IATA_CASE_MCD/main/images/LinceBI3.png)
+
+**Insights obtenidos:**
+- Comparación entre modelos Airbus 320 y Boeing 747
+- Frecuencia de uso de cada modelo de avión por año
+- Identificación del modelo más utilizado en la flota
+- Análisis de tendencias en la utilización de aeronaves
+
+---
+
+##### Pregunta 4: ¿Desde qué ciudades los habitantes realizan más viajes por año?
+
+**Cubo utilizado:** `Superapp_Cube4.2_Schema` (prioridad en ciudad origen/residencia)
+
+**Dimensiones analizadas:**
+- DIM_CLIENTE (Ciudad de residencia)
+- DIM_RUTA (Ciudad origen)
+- DIM_TIEMPO (Año)
+
+**Medida:** COUNT DISTINCT(ID_VENTA) - Cantidad de viajes
+
+**Resultado del análisis en LinceBI:**
+
+![Análisis LinceBI - Pregunta 4](https://raw.githubusercontent.com/esilvas1/IATA_CASE_MCD/main/images/LinceBI4.PNG)
+
+**Insights obtenidos:**
+- Identificación de ciudades con mayor demanda de vuelos por residentes
+- Análisis del comportamiento de viaje por ciudad de origen
+- Comparación temporal para identificar crecimiento en demanda
+- Segmentación geográfica de los pasajeros más frecuentes
+
+---
+
+#### Conclusiones del Análisis OLAP
+
+La implementación de los dos cubos OLAP en LinceBI permitió:
+
+✅ **Exploración interactiva**: Navegación intuitiva mediante drill-down y roll-up en las dimensiones  
+✅ **Respuestas ágiles**: Resolución de las 4 preguntas de negocio de forma visual e interactiva  
+✅ **Jerarquías optimizadas**: La separación en dos cubos (4.1 y 4.2) facilitó el análisis según la prioridad dimensional  
+✅ **Insights de negocio**: Identificación de patrones, tendencias y comportamientos clave en el negocio de vuelos  
+✅ **Toma de decisiones**: Información multidimensional estructurada para decisiones estratégicas
 
 ---
 
 ## Autores
 
-**Estudiante:** Edwin Silva Salas, Carlos Preciado Cárdenas, Cristian Restrepo Zapata       
+**Estudiante:** Carlos Preciado Cárdenas, Edwin Silva Salas, Cristian Restrepo Zapata       
 **Programa:** Maestría en Ciencia de Datos  
 **Universidad:** Pontificia Universidad Javeriana  
 **Repositorio GIT:** [IATA_CASE_MCD](https://github.com/esilvas1/IATA_CASE_MCD)
