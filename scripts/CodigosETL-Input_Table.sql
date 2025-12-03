@@ -1,4 +1,5 @@
 --DIM_RUTA_EXT**
+
 SELECT
     i.id_itinerario              AS ID_RUTA,
     c_o.nombre                   AS CIUDAD_ORIGEN,
@@ -14,6 +15,7 @@ JOIN  IATA.CIUDADES         c_d ON a_d.id_ciudad           = c_d.id_ciudad
 ;
 
 --DIM_TIEMPO_EXT**
+
 SELECT
     -- Secuencia 1,2,3,... según la fecha
     ROW_NUMBER() OVER (ORDER BY f)              AS ID_TIEMPO,
@@ -41,6 +43,7 @@ ORDER BY f
 ;
 
 --DIM_CLIENTE**
+
 SELECT
     -- Clave surrogate de la dimensión = cédula numérica
     u.cedula                               AS ID_CLIENTE,
@@ -66,6 +69,7 @@ FROM IATA.MODELOS m
 ;
 
 --DIM_AEROLINEA
+
 SELECT
     a.id_aerolinea AS ID_AEROLINEA,
     a.nombre       AS NOMBRE_AEROLINEA
@@ -73,41 +77,24 @@ FROM IATA.AEROLINEAS a
 ;
 
 --FACT_VENTAS_VUELOS_EXT
-SELECT
-    -- Clave sustituta de la venta
-    ROW_NUMBER() OVER (
-        ORDER BY v.id_itinerario, v.id_avion, v.id_usuario
-    )                                         AS ID_VENTA,
-
-    -- Tiempo: tomamos el ID de DIM_TIEMPO según la fecha de salida
-    dt.id_tiempo                              AS ID_TIEMPO,
-
-    -- Ruta: mismo ID que en DIM_RUTA (usa el id_itinerario)
-    i.id_itinerario                           AS ID_RUTA,
-
-    -- Aerolínea: mismo ID que en DIM_AEROLINEA
-    a.id_aerolinea                            AS ID_AEROLINEA,
-
-    -- Modelo: mismo ID que en DIM_MODELO
-    av.id_modelo                              AS ID_MODELO,
-
-    -- Cliente: mismo ID que en DIM_CLIENTE (cédula numérica)
-    TO_NUMBER(u.cedula)                       AS ID_CLIENTE,
-
-    -- Métricas
-    v.costo                                   AS COSTO,
-    (i.fecha_llegada - i.fecha_salida) * 24   AS DURACION_VUELO_HORAS,
-
-    -- Nº de pasajeros por (itinerario, avión)
-    COUNT(*) OVER (
-        PARTITION BY i.id_itinerario, av.id_avion
-    )                                         AS CANTIDAD_PASAJEROS
-
-FROM IATA.VUELOS        v
-JOIN IATA.ITINERARIOS   i   ON v.id_itinerario = i.id_itinerario
-JOIN IATA.AVIONES       av  ON v.id_avion      = av.id_avion
-JOIN IATA.AEROLINEAS    a   ON av.id_aerolinea = a.id_aerolinea
-JOIN IATA.USUARIOS      u   ON v.id_usuario    = u.cedula
-JOIN DIM_TIEMPO         dt  ON dt.fecha        = TRUNC(i.fecha_salida)
-
+SELECT 
+    ROW_NUMBER() OVER ( 
+        ORDER BY v.id_itinerario, v.id_avion, v.id_usuario 
+    )                                         AS ID_VENTA, 
+    dt.id_tiempo                              AS ID_TIEMPO, 
+    i.id_itinerario                           AS ID_RUTA, 
+    a.id_aerolinea                            AS ID_AEROLINEA, 
+    av.id_modelo                              AS ID_MODELO, 
+    TO_NUMBER(u.cedula)                       AS ID_CLIENTE, 
+    v.costo                                   AS COSTO, 
+    (i.fecha_llegada - i.fecha_salida) * 24   AS DURACION_VUELO_HORAS, 
+    COUNT(*) OVER ( 
+        PARTITION BY i.id_itinerario, av.id_avion 
+    )                                         AS CANTIDAD_PASAJEROS 
+FROM IATA.VUELOS        v 
+JOIN IATA.ITINERARIOS   i   ON v.id_itinerario = i.id_itinerario 
+JOIN IATA.AVIONES       av  ON v.id_avion      = av.id_avion 
+JOIN IATA.AEROLINEAS    a   ON av.id_aerolinea = a.id_aerolinea 
+JOIN IATA.USUARIOS      u   ON v.id_usuario    = u.cedula 
+JOIN DIM_TIEMPO         dt  ON dt.fecha        = TRUNC(i.fecha_salida);
 

@@ -103,6 +103,8 @@ COMMENT ON COLUMN DIM_CLIENTE.ID_CLIENTE IS 'Clave primaria - identificador úni
 COMMENT ON COLUMN DIM_CLIENTE.NOMBRE_COMPLETO IS 'Nombre y apellido concatenados';
 COMMENT ON COLUMN DIM_CLIENTE.CIUDAD_RESIDENCIA IS 'Ciudad de residencia del pasajero';
 
+
+
 --------------------------------------------------------
 -- TABLA DE HECHOS: FACT_VENTAS_VUELOS
 --------------------------------------------------------
@@ -177,3 +179,7 @@ PROMPT Tablas de dimensiones y hechos listas para carga ETL
 PROMPT ==========================================================
 
 COMMIT;
+
+
+
+
