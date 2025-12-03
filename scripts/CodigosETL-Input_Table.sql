@@ -1,4 +1,4 @@
-**DIM_RUTA_EXT**
+--DIM_RUTA_EXT**
 SELECT
     i.id_itinerario              AS ID_RUTA,
     c_o.nombre                   AS CIUDAD_ORIGEN,
@@ -11,8 +11,9 @@ JOIN  IATA.AEROPUERTOS      a_o ON i.id_aeropuerto_origen  = a_o.id_aeropuerto
 JOIN  IATA.CIUDADES         c_o ON a_o.id_ciudad           = c_o.id_ciudad
 JOIN  IATA.AEROPUERTOS      a_d ON i.id_aeropuerto_destino = a_d.id_aeropuerto
 JOIN  IATA.CIUDADES         c_d ON a_d.id_ciudad           = c_d.id_ciudad
+;
 
-**DIM_TIEMPO_EXT**
+--DIM_TIEMPO_EXT**
 SELECT
     -- Secuencia 1,2,3,... según la fecha
     ROW_NUMBER() OVER (ORDER BY f)              AS ID_TIEMPO,
@@ -37,9 +38,9 @@ FROM (
     SELECT DISTINCT TRUNC(fecha_llegada) AS f FROM IATA.ITINERARIOS
 )
 ORDER BY f
+;
 
-
-**DIM_CLIENTE**
+--DIM_CLIENTE**
 SELECT
     -- Clave surrogate de la dimensión = cédula numérica
     u.cedula                               AS ID_CLIENTE,
@@ -55,20 +56,23 @@ SELECT
 FROM IATA.USUARIOS u
 JOIN IATA.CIUDADES c
       ON u.id_ciudad = c.id_ciudad
-**DIM_MODELO**
+;
+
+--DIM_MODELO
 SELECT
     m.id_modelo  AS ID_MODELO,
     m.nombre     AS NOMBRE_MODELO
 FROM IATA.MODELOS m
+;
 
-**DIM_AEROLINEA**
+--DIM_AEROLINEA
 SELECT
     a.id_aerolinea AS ID_AEROLINEA,
     a.nombre       AS NOMBRE_AEROLINEA
 FROM IATA.AEROLINEAS a
+;
 
-
-**FACT_VENTAS_VUELOS_EXT**
+--FACT_VENTAS_VUELOS_EXT
 SELECT
     -- Clave sustituta de la venta
     ROW_NUMBER() OVER (

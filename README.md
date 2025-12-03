@@ -280,12 +280,175 @@ El Data Mart se creó exitosamente con todas las tablas dimensionales y de hecho
 
 
 
-### Fase 3: Proceso ETL (Pendiente)
-- [ ] Diseñar queries de extracción desde esquema IATA (OLTP)
+### Fase 3: Proceso ETL
+- [x] Diseñar queries de extracción desde esquema IATA (OLTP)
 - [ ] Implementar transformaciones de datos
 - [ ] Cargar dimensiones (DIM_TIEMPO, DIM_RUTA, DIM_AEROLINEA, DIM_MODELO, DIM_CLIENTE)
 - [ ] Cargar tabla de hechos (FACT_VENTAS_VUELOS)
 - [ ] Validar integridad referencial y calidad de datos
+
+#### Diseño de Queries de Extracción (ETL)
+
+Se han diseñado las consultas SQL de extracción, transformación y carga (ETL) para poblar todas las tablas del Data Mart desde el esquema transaccional IATA (OLTP). Estas queries se encuentran documentadas en el archivo [`CodigosETL-Input_Table.sql`](https://github.com/esilvas1/IATA_CASE_MCD/blob/main/scripts/CodigosETL-Input_Table.sql).
+
+**Herramienta ETL utilizada:** **Pentaho Data Integrator (PDI/Kettle)**
+
+Los queries de extracción fueron implementados en **Pentaho Data Integrator**, una herramienta visual de ETL que permite diseñar flujos de integración de datos mediante transformaciones gráficas. Cada query se configuró como un componente "Table Input" dentro de una transformación PDI, facilitando la carga automatizada desde el esquema OLTP (IATA) hacia el Data Mart OLAP (IATA_OLAP).
+
+Las capturas de pantalla de cada transformación ETL implementada en Pentaho se encuentran en la carpeta [`/images/`](https://github.com/esilvas1/IATA_CASE_MCD/tree/main/images) del repositorio y se muestran a continuación para cada tabla dimensional y de hechos.
+
+**Queries de extracción por tabla:**
+
+##### 1. DIM_TIEMPO - Extracción de dimensión temporal
+
+```sql
+SELECT
+    ROW_NUMBER() OVER (ORDER BY f)              AS ID_TIEMPO,
+    f                                           AS FECHA,
+    EXTRACT(YEAR  FROM f)                       AS ANIO,
+    CASE 
+        WHEN EXTRACT(MONTH FROM f) BETWEEN 1 AND 6 THEN 1 
+        ELSE 2 
+    END                                         AS SEMESTRE,
+    TO_NUMBER(TO_CHAR(f, 'Q'))                  AS TRIMESTRE,
+    EXTRACT(MONTH FROM f)                       AS MES,
+    TO_CHAR(f, 'fmMonth', 'NLS_DATE_LANGUAGE=SPANISH')
+                                                AS NOMBRE_MES,
+    EXTRACT(DAY   FROM f)                       AS DIA,
+    TO_NUMBER(TO_CHAR(f, 'D'))                  AS DIA_SEMANA,
+    TO_CHAR(f, 'fmDay', 'NLS_DATE_LANGUAGE=SPANISH')
+                                                AS NOMBRE_DIA
+FROM (
+    SELECT DISTINCT TRUNC(fecha_salida)  AS f FROM IATA.ITINERARIOS
+    UNION
+    SELECT DISTINCT TRUNC(fecha_llegada) AS f FROM IATA.ITINERARIOS
+)
+ORDER BY f;
+```
+
+**Descripción:** Extrae todas las fechas únicas de salida y llegada de vuelos desde `IATA.ITINERARIOS`, generando automáticamente los atributos temporales (año, semestre, trimestre, mes, día, nombres en español).
+
+**Implementación en Pentaho Data Integrator:**
+
+![Transformación ETL - DIM_TIEMPO](https://raw.githubusercontent.com/esilvas1/IATA_CASE_MCD/main/images/DIM_TIEMPO.png)
+
+##### 2. DIM_RUTA - Extracción de dimensión geográfica
+
+```sql
+SELECT
+    i.id_itinerario                           AS ID_RUTA,
+    c_o.nombre                                AS CIUDAD_ORIGEN,
+    a_o.nombre                                AS AEROPUERTO_ORIGEN,
+    c_d.nombre                                AS CIUDAD_DESTINO,
+    a_d.nombre                                AS AEROPUERTO_DESTINO,
+    c_o.nombre || ' - ' || c_d.nombre         AS RUTA_COMPLETA
+FROM  IATA.ITINERARIOS      i
+JOIN  IATA.AEROPUERTOS      a_o ON i.id_aeropuerto_origen  = a_o.id_aeropuerto
+JOIN  IATA.CIUDADES         c_o ON a_o.id_ciudad           = c_o.id_ciudad
+JOIN  IATA.AEROPUERTOS      a_d ON i.id_aeropuerto_destino = a_d.id_aeropuerto
+JOIN  IATA.CIUDADES         c_d ON a_d.id_ciudad           = c_d.id_ciudad;
+```
+
+**Descripción:** Combina itinerarios con aeropuertos y ciudades para generar rutas completas origen-destino con información descriptiva.
+
+**Implementación en Pentaho Data Integrator:**
+
+![Transformación ETL - DIM_RUTA](https://raw.githubusercontent.com/esilvas1/IATA_CASE_MCD/main/images/DIM_RUTA.png)
+
+##### 3. DIM_AEROLINEA - Extracción de dimensión de aerolíneas
+
+```sql
+SELECT
+    a.id_aerolinea AS ID_AEROLINEA,
+    a.nombre       AS NOMBRE_AEROLINEA
+FROM IATA.AEROLINEAS a;
+```
+
+**Descripción:** Extracción directa de todas las aerolíneas desde la tabla maestra `IATA.AEROLINEAS`.
+
+**Implementación en Pentaho Data Integrator:**
+
+![Transformación ETL - DIM_AEROLINEA](https://raw.githubusercontent.com/esilvas1/IATA_CASE_MCD/main/images/DIM_AEROLINEA.png)
+
+##### 4. DIM_MODELO - Extracción de dimensión de modelos de avión
+
+```sql
+SELECT
+    m.id_modelo  AS ID_MODELO,
+    m.nombre     AS NOMBRE_MODELO
+FROM IATA.MODELOS m;
+```
+
+**Descripción:** Extracción directa de todos los modelos de avión desde la tabla maestra `IATA.MODELOS`.
+
+**Implementación en Pentaho Data Integrator:**
+
+![Transformación ETL - DIM_MODELO](https://raw.githubusercontent.com/esilvas1/IATA_CASE_MCD/main/images/DIM_MODELO.png)
+
+##### 5. DIM_CLIENTE - Extracción de dimensión de clientes/pasajeros
+
+```sql
+SELECT
+    u.cedula                               AS ID_CLIENTE,
+    u.nombre || ' ' || u.apellido          AS NOMBRE_COMPLETO,
+    u.email                                AS EMAIL,
+    c.nombre                               AS CIUDAD_RESIDENCIA
+FROM IATA.USUARIOS u
+JOIN IATA.CIUDADES c ON u.id_ciudad = c.id_ciudad;
+```
+
+**Descripción:** Combina información de usuarios con sus ciudades de residencia, concatenando nombre y apellido en un solo campo.
+
+**Implementación en Pentaho Data Integrator:**
+
+![Transformación ETL - DIM_CLIENTE](https://raw.githubusercontent.com/esilvas1/IATA_CASE_MCD/main/images/DIM_CLIENTE.png)
+
+##### 6. FACT_VENTAS_VUELOS - Extracción de tabla de hechos
+
+```sql
+SELECT
+    ROW_NUMBER() OVER (
+        ORDER BY v.id_itinerario, v.id_avion, v.id_usuario
+    )                                         AS ID_VENTA,
+    dt.id_tiempo                              AS ID_TIEMPO,
+    i.id_itinerario                           AS ID_RUTA,
+    a.id_aerolinea                            AS ID_AEROLINEA,
+    av.id_modelo                              AS ID_MODELO,
+    TO_NUMBER(u.cedula)                       AS ID_CLIENTE,
+    v.costo                                   AS COSTO,
+    (i.fecha_llegada - i.fecha_salida) * 24   AS DURACION_VUELO_HORAS,
+    COUNT(*) OVER (
+        PARTITION BY i.id_itinerario, av.id_avion
+    )                                         AS CANTIDAD_PASAJEROS
+FROM IATA.VUELOS        v
+JOIN IATA.ITINERARIOS   i   ON v.id_itinerario = i.id_itinerario
+JOIN IATA.AVIONES       av  ON v.id_avion      = av.id_avion
+JOIN IATA.AEROLINEAS    a   ON av.id_aerolinea = a.id_aerolinea
+JOIN IATA.USUARIOS      u   ON v.id_usuario    = u.cedula
+JOIN DIM_TIEMPO         dt  ON dt.fecha        = TRUNC(i.fecha_salida);
+```
+
+**Descripción:** Query complejo que integra datos de múltiples tablas transaccionales (VUELOS, ITINERARIOS, AVIONES, AEROLINEAS, USUARIOS) con la dimensión temporal ya cargada (DIM_TIEMPO). Calcula métricas como duración del vuelo en horas y cantidad de pasajeros por vuelo.
+
+**Implementación en Pentaho Data Integrator:**
+
+![Transformación ETL - FACT_VENTAS_VUELOS](https://raw.githubusercontent.com/esilvas1/IATA_CASE_MCD/main/images/FACT_VENTAS_VUELOS.png)
+
+---
+
+**Ver código completo de todos los queries ETL:** [`CodigosETL-Input_Table.sql`](https://github.com/esilvas1/IATA_CASE_MCD/blob/main/scripts/CodigosETL-Input_Table.sql)
+
+**Ver capturas de pantalla completas:** [Carpeta /images/ en GitHub](https://github.com/esilvas1/IATA_CASE_MCD/tree/main/images)
+
+**Secuencia de ejecución ETL:**
+1. Cargar **DIM_TIEMPO** (sin dependencias)
+2. Cargar **DIM_RUTA** (sin dependencias)
+3. Cargar **DIM_AEROLINEA** (sin dependencias)
+4. Cargar **DIM_MODELO** (sin dependencias)
+5. Cargar **DIM_CLIENTE** (sin dependencias)
+6. Cargar **FACT_VENTAS_VUELOS** (requiere que DIM_TIEMPO esté poblada)
+
+**Validación:** Verificar integridad referencial y conteo de registros en cada paso.
 
 ### Fase 4: Análisis y Reporting (Pendiente)
 - [ ] Desarrollar consultas analíticas clave
