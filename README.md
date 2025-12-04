@@ -565,9 +565,9 @@ DIM_RUTA Jerarquía:
 ```
 
 **Uso:** Análisis que priorizan el **destino** como punto de partida del análisis:
-- Pregunta 1: ¿Qué aerolíneas vuelan más a **ciudades destino** específicas?
-- Pregunta 2: ¿Cuánto recaudan las aerolíneas por semestre?
-- Pregunta 3: ¿Qué modelos de avión realizan más vuelos?
+- Pregunta 1: ¿Cuál aerolínea realizó el mayor número de vuelos a la ciudad de Roma en el año 2019 y cuál en el año 2020?
+- Pregunta 2: Total de dinero recaudado por vuelos de cada aerolínea en el primer semestre del año 2019 y en el primer semestre del año 2020.
+- Pregunta 3: ¿Cuál modelo de avión realizó el mayor número de vuelos en el año 2019 y cuál en el año 2020?
 
 **Cubo 4.2 (Superapp_Cube4.2_Schema):**
 
@@ -583,7 +583,7 @@ DIM_RUTA Jerarquía:
 ```
 
 **Uso:** Análisis que priorizan el **origen/residencia** como punto de partida del análisis:
-- Pregunta 4: ¿Desde qué **ciudades de residencia** los habitantes viajan más?
+- Pregunta 4: ¿Cuál fue la ciudad cuyos habitantes viajaron más en el año 2019 y cuál en el año 2020?
 
 
 **Ver archivos completos de los cubos:**
@@ -605,14 +605,14 @@ Una vez implementados los cubos OLAP en el servidor **LinceBI**, se procedió a 
 - **Saiku Analytics**: Interfaz visual para consultas MDX sobre cubos OLAP
 - **Motor Mondrian**: Procesamiento de consultas multidimensionales
 
-##### Pregunta 1: ¿Qué aerolíneas realizan más vuelos hacia determinadas ciudades por año?
+##### Pregunta 1: ¿Cuál aerolínea realizó el mayor número de vuelos a la ciudad de Roma en el año 2019 y cuál en el año 2020?
 
 **Cubo utilizado:** `Superapp_Cube4.1_Schema` (prioridad en ciudad destino)
 
 **Dimensiones analizadas:**
 - DIM_AEROLINEA (Nombre de aerolínea)
-- DIM_RUTA (Ciudad destino)
-- DIM_TIEMPO (Año)
+- DIM_RUTA (Ciudad destino = Roma)
+- DIM_TIEMPO (Año: 2019, 2020)
 
 **Medida:** COUNT DISTINCT(ID_VENTA) - Cantidad de vuelos
 
@@ -620,21 +620,34 @@ Una vez implementados los cubos OLAP en el servidor **LinceBI**, se procedió a 
 
 ![Análisis LinceBI - Pregunta 1](https://raw.githubusercontent.com/esilvas1/IATA_CASE_MCD/main/images/LinceBI1.png)
 
+**Resultados obtenidos:**
+
+| AEROLINEA | CIUDAD_DESTINO | ANIO | CANTIDAD_VUELOS |
+|-----------|----------------|------|-----------------|
+| Avianca   | Roma           | 2019 | 11              |
+| Wingo     | Roma           | 2019 | 4               |
+| **Respuesta 2019:** Avianca con 11 vuelos | | | |
+| | | | |
+| Avianca   | Roma           | 2020 | 0               |
+| Wingo     | Roma           | 2020 | 0               |
+| Latam     | Roma           | 2020 | 0               |
+| **Respuesta 2020:** No se registraron vuelos a Roma | | | |
+
 **Insights obtenidos:**
-- Visualización de las aerolíneas con mayor frecuencia de vuelos hacia ciudades específicas
-- Análisis temporal por año para identificar tendencias
-- Comparación entre aerolíneas (Avianca, Latam, Wingo) por destino
-- Identificación de rutas más operadas por cada aerolínea
+- **Avianca** lideró los vuelos hacia Roma en 2019 con 11 operaciones
+- Wingo operó 4 vuelos a Roma en 2019 como segunda opción
+- En 2020 no se registraron vuelos hacia Roma (posible impacto de restricciones de viaje)
+- Avianca mantuvo presencia constante en rutas europeas durante el periodo de operación normal
 
 ---
 
-##### Pregunta 2: ¿Cuánto recaudan las aerolíneas por semestre?
+##### Pregunta 2: Total de dinero recaudado por vuelos de cada aerolínea en el primer semestre del año 2019 y en el primer semestre del año 2020
 
 **Cubo utilizado:** `Superapp_Cube4.1_Schema`
 
 **Dimensiones analizadas:**
 - DIM_AEROLINEA (Nombre de aerolínea)
-- DIM_TIEMPO (Semestre, Año)
+- DIM_TIEMPO (Semestre = 1, Año: 2019, 2020)
 
 **Medida:** SUM(COSTO) - Recaudación total
 
@@ -642,21 +655,42 @@ Una vez implementados los cubos OLAP en el servidor **LinceBI**, se procedió a 
 
 ![Análisis LinceBI - Pregunta 2](https://raw.githubusercontent.com/esilvas1/IATA_CASE_MCD/main/images/LinceBI2.PNG)
 
+**Resultados obtenidos:**
+
+**Primer Semestre 2019:**
+
+| AEROLINEA | SEMESTRE | ANIO | RECAUDACION_TOTAL |
+|-----------|----------|------|-------------------|
+| Avianca   | 1        | 2019 | $90,089,500       |
+| Latam     | 1        | 2019 | $81,830,300       |
+| Wingo     | 1        | 2019 | $46,104,600       |
+| **Total S1 2019** | | | **$218,024,400** |
+
+**Primer Semestre 2020:**
+
+| AEROLINEA | SEMESTRE | ANIO | RECAUDACION_TOTAL |
+|-----------|----------|------|-------------------|
+| Latam     | 1        | 2020 | $14,530,000       |
+| Avianca   | 1        | 2020 | $9,890,000        |
+| Wingo     | 1        | 2020 | $6,000,000        |
+| **Total S1 2020** | | | **$30,420,000** |
+
 **Insights obtenidos:**
-- Recaudación total por aerolínea segmentada por semestre
-- Comparación de ingresos entre semestres (temporada alta vs baja)
-- Identificación de aerolíneas con mayor participación en el mercado
-- Análisis de estacionalidad en las ventas
+- **Avianca** lideró la recaudación en S1 2019 con $90M (41% del mercado)
+- **Latam** lideró la recaudación en S1 2020 con $14.5M (48% del mercado reducido)
+- Caída drástica del 86% en recaudación total entre S1 2019 y S1 2020 ($218M → $30M)
+- Las tres aerolíneas experimentaron impacto significativo en 2020, consistente con restricciones de pandemia
+- Wingo fue la más afectada con 87% de reducción en sus ingresos
 
 ---
 
-##### Pregunta 3: ¿Qué modelos de avión realizan más vuelos por año?
+##### Pregunta 3: ¿Cuál modelo de avión realizó el mayor número de vuelos en el año 2019 y cuál en el año 2020?
 
 **Cubo utilizado:** `Superapp_Cube4.1_Schema`
 
 **Dimensiones analizadas:**
-- DIM_MODELO (Nombre del modelo)
-- DIM_TIEMPO (Año)
+- DIM_MODELO (Nombre del modelo: Airbus 320, Boeing 747)
+- DIM_TIEMPO (Año: 2019, 2020)
 
 **Medida:** COUNT DISTINCT(ID_VENTA) - Cantidad de vuelos
 
@@ -664,22 +698,35 @@ Una vez implementados los cubos OLAP en el servidor **LinceBI**, se procedió a 
 
 ![Análisis LinceBI - Pregunta 3](https://raw.githubusercontent.com/esilvas1/IATA_CASE_MCD/main/images/LinceBI3.png)
 
+**Resultados obtenidos:**
+
+| MODELO_AVION | ANIO | CANTIDAD_VUELOS |
+|--------------|------|-----------------|
+| **Airbus 320**   | 2019 | **70** |
+| Boeing 747   | 2019 | 50              |
+| **Respuesta 2019:** Airbus 320 con 70 vuelos | | |
+| | | |
+| **Airbus 320**   | 2020 | **24** |
+| Boeing 747   | 2020 | 16              |
+| **Respuesta 2020:** Airbus 320 con 24 vuelos | | |
+
 **Insights obtenidos:**
-- Comparación entre modelos Airbus 320 y Boeing 747
-- Frecuencia de uso de cada modelo de avión por año
-- Identificación del modelo más utilizado en la flota
-- Análisis de tendencias en la utilización de aeronaves
+- El **Airbus 320** fue el modelo más utilizado en ambos años (70 vuelos en 2019, 24 en 2020)
+- Airbus 320 representó el 58% de los vuelos en 2019 y el 60% en 2020
+- Boeing 747 operó consistentemente como segundo modelo más usado (50 y 16 vuelos)
+- Ambos modelos experimentaron reducciones similares (~65-68%) en operaciones de 2019 a 2020
+- La preferencia por Airbus 320 se mantuvo constante a pesar de la reducción de operaciones
 
 ---
 
-##### Pregunta 4: ¿Desde qué ciudades los habitantes realizan más viajes por año?
+##### Pregunta 4: ¿Cuál fue la ciudad cuyos habitantes viajaron más en el año 2019 y cuál en el año 2020?
 
 **Cubo utilizado:** `Superapp_Cube4.2_Schema` (prioridad en ciudad origen/residencia)
 
 **Dimensiones analizadas:**
 - DIM_CLIENTE (Ciudad de residencia)
 - DIM_RUTA (Ciudad origen)
-- DIM_TIEMPO (Año)
+- DIM_TIEMPO (Año: 2019, 2020)
 
 **Medida:** COUNT DISTINCT(ID_VENTA) - Cantidad de viajes
 
@@ -687,11 +734,38 @@ Una vez implementados los cubos OLAP en el servidor **LinceBI**, se procedió a 
 
 ![Análisis LinceBI - Pregunta 4](https://raw.githubusercontent.com/esilvas1/IATA_CASE_MCD/main/images/LinceBI4.PNG)
 
+**Resultados obtenidos:**
+
+**Año 2019:**
+
+| CIUDAD_RESIDENCIA | ANIO | CANTIDAD_VIAJES |
+|-------------------|------|-----------------|
+| **Medellín**      | 2019 | **36**          |
+| Bogotá            | 2019 | 30              |
+| Santiago de Cali  | 2019 | 30              |
+| Roma              | 2019 | 12              |
+| Londres           | 2019 | 6               |
+| Nueva York        | 2019 | 6               |
+| **Respuesta 2019:** Medellín con 36 viajes | | |
+
+**Año 2020:**
+
+| CIUDAD_RESIDENCIA | ANIO | CANTIDAD_VIAJES |
+|-------------------|------|-----------------|
+| **Medellín**      | 2020 | **12**          |
+| Bogotá            | 2020 | 10              |
+| Santiago de Cali  | 2020 | 10              |
+| Roma              | 2020 | 4               |
+| Nueva York        | 2020 | 2               |
+| Londres           | 2020 | 2               |
+| **Respuesta 2020:** Medellín con 12 viajes | | |
+
 **Insights obtenidos:**
-- Identificación de ciudades con mayor demanda de vuelos por residentes
-- Análisis del comportamiento de viaje por ciudad de origen
-- Comparación temporal para identificar crecimiento en demanda
-- Segmentación geográfica de los pasajeros más frecuentes
+- **Medellín** lideró la cantidad de viajes en ambos años (36 en 2019, 12 en 2020)
+- Las tres principales ciudades colombianas (Medellín, Bogotá, Cali) concentran el 80% de los viajes
+- Reducción de 67% en viajes desde Medellín entre 2019 y 2020
+- Ciudades internacionales (Roma, Londres, Nueva York) muestran menor volumen pero presencia constante
+- Patrón de demanda se mantuvo consistente: Medellín > Bogotá ≈ Cali > Ciudades internacionales
 
 ---
 
